@@ -1,0 +1,27 @@
+@(title: String, search: SearchResult)
+
+<div class="border" style="margin-top:20px;">
+    <h4 class="h5" style="margin-left: 20px; margin-top:10px;"> @title: @search.input </h4>
+    <hr class="my-1">
+    @if(search.repositories.isEmpty()) {
+        <p class="font-weight-bold">No repositories matched</p>
+    } else {
+    <ol>
+        @for(repo <- search.repositories) {
+        <li style="margin-bottom: 10px;">
+            User: <a href="/profile/@repo.user">@repo.user</a>
+            /
+            repository: <a href="/repository/@repo.user/@repo.name">@repo.name</a><br/>
+            @if(repo.topics.isEmpty()) {
+            <span class="badge badge-pill badge-light">No topic</span>
+            } else {
+            Topics:
+            @for(topic <- repo.topics) {
+            <a href="/topic/@topic" class="badge badge-secondary">@topic</a>
+            }
+            }
+        </li>
+        }
+    </ol>
+    }
+</div>

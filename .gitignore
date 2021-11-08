@@ -1,0 +1,18 @@
+# IDEA files
+.idea/
+*.iml
+*.ipr
+*.iws
+build-idea/
+out/
+
+# eclipse files
+.project
+.classpath
+.settings
+build-eclipse/
+
+# sbt
+target/
+project/target
+/logs/application.log

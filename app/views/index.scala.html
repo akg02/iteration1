@@ -1,0 +1,19 @@
+@import play.mvc.Http.Request
+@(searches: List[SearchResult], form: Form[SearchForm])(implicit request: Request, messages: play.i18n.Messages)
+
+@main("Welcome to Gitterific!") {
+
+    @helper.form(routes.SearchController.search, 'class -> "input-group mb-3") {
+        <div class="input-group mb-3">
+            @helper.CSRF.formField
+            <input type="text" class="form-control" placeholder="Enter search terms" id="input" name="input">
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="submit">Search!</button>
+            </div>
+        </div>
+    }
+
+    @for(search <- searches) {
+        @listRepositories("Search terms", search)
+    }
+}
