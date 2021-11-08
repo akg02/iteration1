@@ -26,6 +26,7 @@ public class GithubClient {
         WSRequest request = client.url(baseURL + "/search/repositories");
         return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .addQueryParameter("q", (isTopic ? "topic:" : "") + query)
+                .addQueryParameter("sort", "updated")
                 .addQueryParameter("per_page", "10")
                 .get()
                 .thenApply(r -> {
