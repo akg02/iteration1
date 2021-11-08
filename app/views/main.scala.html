@@ -1,0 +1,22 @@
+@(title: String)(content: Html)
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>@title</title>
+    <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("stylesheets/bootstrap.min.css")'>
+</head>
+
+<body>
+<div class="container">
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand" href="/">
+            <img src='@routes.Assets.versioned("images/git.svg")'
+                 width="30" height="30" class="d-inline-block align-top" alt="">
+            Gitterific
+        </a>
+    </nav>
+    @content
+</div>
+</body>
+</html>

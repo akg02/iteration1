@@ -1,0 +1,11 @@
+GET    /                            controllers.SearchController.index(request: Request)
+POST   /search                      controllers.SearchController.search(request: Request)
+
+GET    /topic/:topic                controllers.SearchController.topic(topic: String)
+
+GET    /profile/:user               controllers.SearchController.profile(user: String)
+
+GET    /repository/:user/:repo      controllers.SearchController.repository(user: String, repo: String)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
