@@ -1,0 +1,8 @@
+@import play.mvc.Http.Request
+@(commits: List[CommitStats])(implicit request: Request)
+
+@main("Welcome") {
+@for(report <- commits) {
+<li>@Html(report.getEmail())</li>
+}
+}
