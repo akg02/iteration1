@@ -3,10 +3,8 @@ package models;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.typesafe.config.Config;
@@ -42,25 +40,22 @@ public class GithubClient {
 				});
 	}
 
-	public CompletionStage<Void> getIssues(String authorName, String repositoryName) {
+	public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {
 		WSRequest request = client.url(baseURL + "/repos/" + authorName + "/" + repositoryName + "/issues");
 		ObjectMapper objectMapper = new ObjectMapper();
+
 		return request.addHeader("Accept", "application/vnd.github.v3+json").get().thenApply(r -> {
 			List<Issue> issues = null;
 			try {
 				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 				issues = objectMapper.readValue(r.asJson().toPrettyString(), new TypeReference<List<Issue>>() {
-				});
-			} catch (JsonMappingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (JsonProcessingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println(issues.get(0).getTitle());
 
-			return null;
+				});
+
+			} catch (Exception e) {
+				return null;
+			}
+			return issues;
 		});
 	}
 }

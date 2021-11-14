@@ -1,0 +1,8 @@
+@import play.mvc.Http.Request
+@(issuesStatistics: Map[String, Integer])(implicit request: Request)
+
+@main("Issue Statistics") {
+@for((key, value) <- issuesStatistics){
+<li>@key : @value</li>
+}
+}

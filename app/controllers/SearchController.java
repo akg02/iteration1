@@ -3,6 +3,7 @@ package controllers;
 import com.google.inject.Inject;
 import models.GithubClient;
 import models.Issue;
+import models.IssueService;
 import models.SearchResult;
 import models.SearchService;
 import play.data.Form;
@@ -13,6 +14,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -29,6 +31,7 @@ public class SearchController extends Controller {
     private final Form<SearchForm> searchForm;
     private final MessagesApi messagesApi;
     private final SearchService searchService;
+    private final IssueService issueService;
 
     @Inject
     public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi) {
@@ -36,6 +39,7 @@ public class SearchController extends Controller {
         this.searchForm = formFactory.form(SearchForm.class);
         this.messagesApi = messagesApi;
         this.searchService = new SearchService(github);
+        this.issueService  = new IssueService(github);
     }
 
     /**
@@ -88,9 +92,10 @@ public class SearchController extends Controller {
         return CompletableFuture.completedFuture(ok(views.html.repository.render(fullName)));
     }
     
-    public CompletionStage<Result> issueStatistics(String user, String repo){
-    	System.out.println("Hello");
-    	System.out.println(searchService.getIssues(user, repo));
-    	return CompletableFuture.completedFuture(ok(views.html.repository.render(user)));
+    public CompletionStage<Result> issueStatistics(String user, String repo,Http.Request request){
+    	CompletionStage<Result> result = issueService.getIssueStatistics(user, repo).thenApplyAsync(
+    			op -> ok(views.html.issuesStatistics.render(op, request)));
+    			
+    	return result;
     }
 }
