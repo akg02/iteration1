@@ -2,10 +2,7 @@ package models;
 
 import com.google.inject.Inject;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -17,22 +14,41 @@ public class CommitService {
         this.github = github;
     }
 
-    public CompletionStage<List<CommitStats>> getCommitStats(String user, String repo) {
-        return github.commitList(user,repo).thenApply((output) -> {
-            System.out.println(output);
-            return output;
+    public CompletionStage<Map<String, Integer>> getCommitStats(String user, String repo) {
+        //ArrayList<CommitStats> commitStatsList = new ArrayList<>();
+        CompletionStage<ArrayList<CommitStats>> commitList = github.commitList(user, repo);
+        return commitList.thenApplyAsync(list -> {
+                github.getCommitStat(user, repo, list);
+                return list;
+            }
+        ).thenApplyAsync((output) -> {
+            System.out.println("output1111"+output);
+            Map<String, Integer> result = output.stream()
+                    .map(op -> op.getName())
+                    .collect(Collectors.toMap(w -> w, w -> 1, Integer::sum));
+
+            result = result.entrySet()
+                    .stream()
+                    .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+                    .limit(10)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
+            System.out.println(result);
+            return result;
         });
-//        return CompletableFuture.supplyAsync(() -> {
-//            List<CommitStats> result = null;
-//            try{
-//                System.out.println(github==null);
-//                result = github.commitList(user, repo);
-//                System.out.println("result is here"+result);
-//            }
-//            catch (Exception e){
-//                e.printStackTrace();
-//            }
+//        System.out.println("My list is here" + commitStatsList);
+//        return github.commitList(user, repo).thenApplyAsync((output) -> {
+//            Map<String, Integer> result = output.stream()
+//                    .map(op -> op.getName())
+//                    .collect(Collectors.toMap(w -> w, w -> 1, Integer::sum));
+//
+//            result = result.entrySet()
+//                    .stream()
+//                    .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+//                    .limit(10)
+//                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
+//            System.out.println(result);
 //            return result;
+//
 //        });
     }
 

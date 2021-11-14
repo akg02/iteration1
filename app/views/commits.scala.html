@@ -1,8 +1,8 @@
 @import play.mvc.Http.Request
-@(commits: List[CommitStats])(implicit request: Request)
+@(commits: Map[String, Integer])(implicit request: Request)
 
-@main("Welcome") {
-@for(report <- commits) {
-<li>@Html(report.getEmail())</li>
+@main("Commit Details") {
+@for((key, value) <- commits){
+<li><a href="/profile/@key">@key</a> Count: @value</li>
 }
 }

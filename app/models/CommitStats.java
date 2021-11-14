@@ -5,15 +5,17 @@ public class CommitStats {
     private String email;
     private int addition;
     private int deletion;
+    private String sha;
 
     public CommitStats() {
     }
 
-    public CommitStats(String author, String email, int addition, int deletion) {
+    public CommitStats(String author, String email, int addition, int deletion, String sha) {
         this.name = author;
         this.email = email;
         this.addition = addition;
         this.deletion = deletion;
+        this.sha = sha;
     }
 
     public String getName() {
@@ -48,13 +50,22 @@ public class CommitStats {
         this.deletion = deletion;
     }
 
+    public String getSha() {
+        return sha;
+    }
+
+    public void setSha(String sha) {
+        this.sha = sha;
+    }
+
     @Override
     public String toString() {
         return "CommitStats{" +
-                "author='" + name + '\'' +
+                "name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", addition=" + addition +
                 ", deletion=" + deletion +
+                ", sha='" + sha + '\'' +
                 '}';
     }
 }
