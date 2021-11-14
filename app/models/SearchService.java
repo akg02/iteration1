@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Future;
 
 /**
  * @author Hop Nguyen
@@ -43,6 +44,10 @@ public class SearchService {
                 });
     }
 
+    public CompletionStage<Object> getIssues(String user,String repo){
+    	return github.getIssues(user, repo);
+    }
+    
     public synchronized List<SearchResult> getHistory(String sessionId) {
         return sessions.getOrDefault(sessionId, new ArrayList<>());
     }

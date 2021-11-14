@@ -2,6 +2,7 @@ package controllers;
 
 import com.google.inject.Inject;
 import models.GithubClient;
+import models.Issue;
 import models.SearchResult;
 import models.SearchService;
 import play.data.Form;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Future;
 
 /**
  * @author Hop Nguyen
@@ -84,5 +86,11 @@ public class SearchController extends Controller {
     public CompletionStage<Result> repository(String user, String repo) {
         String fullName = user + "/" + repo;
         return CompletableFuture.completedFuture(ok(views.html.repository.render(fullName)));
+    }
+    
+    public CompletionStage<Result> issueStatistics(String user, String repo){
+    	System.out.println("Hello");
+    	System.out.println(searchService.getIssues(user, repo));
+    	return CompletableFuture.completedFuture(ok(views.html.repository.render(user)));
     }
 }
