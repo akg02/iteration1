@@ -11,4 +11,5 @@ libraryDependencies ++= Seq(
   guice,
   ws,
   "org.mockito" % "mockito-core" % "4.0.0" % "test",
+  ehcache
 )
