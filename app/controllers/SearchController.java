@@ -90,7 +90,7 @@ public class SearchController extends Controller {
     /**
      * Route for Commits
      */
-    public CompletionStage<Result> commits(String user, String repo, Http.Request request) {
+    public CompletionStage<Result> commits(String user, String repo, Http.Request request) throws Exception {
         String fullName = user + "/" + repo;
         CompletionStage<Result> resultCompletionStage =  commitService.getCommitStats(user,repo)
                 .thenApplyAsync(output -> ok(views.html.commits.render(output, request)));

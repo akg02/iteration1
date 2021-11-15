@@ -2,7 +2,6 @@ package models;
 
 import com.google.inject.Inject;
 import com.typesafe.config.Config;
-import org.checkerframework.checker.units.qual.A;
 import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
@@ -16,9 +15,9 @@ import java.util.concurrent.CompletionStage;
  * @version 1: Hop Nguyen implements the project framework, search, and topic feature.
  */
 public class GithubClient {
-    private final WSClient client;
-    private final WSClient statClient;
-    private final String baseURL;
+    public final WSClient client;
+    public final WSClient statClient;
+    public final String baseURL;
     private ArrayList<CommitStats> list;
 
     public ArrayList<CommitStats> getList() {
@@ -51,84 +50,49 @@ public class GithubClient {
                 });
     }
 
-//    public CompletionStage<ArrayList<CommitStats>> commitList(String authorName, String repoName) {
-//        WSRequest commitRequest = client.url(baseURL+"/repos/"+authorName+"/"+repoName+"/commits");
-//        ArrayList<CommitStats> commitsList = new ArrayList<>();
-//        return commitRequest.addHeader("Accept", "application/vnd.github.v3+json")
-//                .addQueryParameter("per_page", "2" )
-//                .get()
-//                .thenApplyAsync( r -> {
-//                    //System.out.println(r.asJson());
-//                    int f = 0;
-//                    CompletionStage<CommitStats> commits ;
-//                    System.out.println("API call start");
-//                    while(r.asJson().get(f)!=null) {
-//                        WSRequest statRequest;
-//                        statRequest = statClient.url(baseURL+"/repos/"+authorName+"/"+repoName+"/commits/"
-//                                        +r.asJson().get(f).get("sha").asText());
-//                        statRequest.addHeader("Accept", "application/vnd.github.v3+json")
-//                                .get()
-//                                .thenApplyAsync( sr -> {
-//                                    CommitStats commitStats;
-//                                   // commitStats = Json.fromJson(r.asJson().get(f).get("commit").get("author"), CommitStats.class);
-//                                    commitStats = Json.fromJson(sr.asJson().get("commit").get("author"), CommitStats.class);
-//                                    commitStats.setAddition(sr.asJson().get("stats").get("additions").asInt());
-//                                    commitStats.setAddition(sr.asJson().get("stats").get("additions").asInt());
-//                                    commitsList.add(commitStats);
-//                                    System.out.println(commitStats);
-//                                    return commitStats;
-//                                });
-//                        //commits = Json.fromJson(r.asJson().get(f).get("commit").get("author"), CommitStats.class);
-//                        //commitsList.add(commits);
-//                        f++;
-//                    }
-//                    return commitsList;
-//                });
-//    }
-
-    public CompletionStage<ArrayList<CommitStats>> commitList(String authorName, String repoName) {
-        WSRequest commitRequest = client.url(baseURL+"/repos/"+authorName+"/"+repoName+"/commits");
-        ArrayList<CommitStats> commitsList = new ArrayList<>();
-        return commitRequest.addHeader("Accept", "application/vnd.github.v3+json")
-                .addQueryParameter("per_page", "5" )
+    public CompletableFuture<ArrayList<String>> getAllCommitList(String userName, String repoName){
+        WSRequest request = client.url(baseURL + "/repos/"+userName+"/" +
+                repoName+"/commits");
+        return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .addHeader("Authorization", "token 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")
+                .addQueryParameter("per_page", "5")
                 .get()
                 .thenApplyAsync( r -> {
-                    int f = 0;
-                    CommitStats commits ;
-                    while(r.asJson().get(f)!=null) {
-                        commits = Json.fromJson(r.asJson().get(f).get("commit").get("author"), CommitStats.class);
-                        commits.setName(r.asJson().get(f).get("author").get("login").asText());
-                        commits.setSha(r.asJson().get(f).get("sha").asText());
-                        commitsList.add(commits);
-                        f++;
-                    }
-                    return commitsList;
-                });
+                    ArrayList<String> commitIDList = new ArrayList<>();
+                   int f = 0;
+                   while(r.asJson().get(f)!=null){
+                       commitIDList.add(r.asJson().get(f).get("sha").asText());
+                       f++;
+                   }
+                    return commitIDList;
+                }).toCompletableFuture();
     }
 
-    public ArrayList<CommitStats> getCommitStat(String userName, String repoName, ArrayList<CommitStats> list ){
-        ArrayList<CommitStats> output = new ArrayList<>();
-        for(int i = 0; i<list.size(); i++){
-            WSRequest statRequest = statClient.url(baseURL+"/repos/"+userName+"/"
-                    +repoName+"/commits/"+list.get(i).getSha());
-            statRequest.addHeader("Accept", "application/vnd.github.v3+json")
-                    .addHeader("Authorization", "token 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")
-                    .get()
-                    .thenApplyAsync( r -> {
-                        CommitStats commits ;
-                        System.out.println(r.asJson().get("stats"));
-                        commits = Json.fromJson(r.asJson().get("commit").get("author"), CommitStats.class);
-                        commits.setName(r.asJson().get("author").get("login").asText());
-                        commits.setSha(r.asJson().get("sha").asText());
-                        commits.setAddition(r.asJson().get("stats").get("additions").asInt());
-                        commits.setDeletion(r.asJson().get("stats").get("deletions").asInt());
-                        output.add(commits);
-                        System.out.println("commits"+ commits);
-                        return commits;
-                    });
-        }
-        return output;
+    public CompletableFuture<CommitStats> getCommitStatByID(String userName, String repoName, String commitID){
+        WSRequest request = client.url(baseURL + "/repos/"+userName+"/" +
+                repoName+"/commits/"+commitID);
 
+        return request.addHeader("Accept", "application/vnd.github.v3+json")
+                .addHeader("Authorization", "token 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")
+                .addQueryParameter("per_page", "5")
+                .get()
+                .thenApplyAsync( r-> {
+                   CommitStats commitStats;
+                    commitStats = Json.fromJson(r.asJson().get("commit").get("author"), CommitStats.class);
+                    commitStats.setName(r.asJson().get("author").get("login").asText());
+                    commitStats.setSha(r.asJson().get("sha").asText());
+                    commitStats.setAddition(r.asJson().get("stats").get("additions").asInt());
+                    commitStats.setDeletion(r.asJson().get("stats").get("deletions").asInt());
+                    return commitStats;
+                }).toCompletableFuture();
+    }
+
+    public ArrayList<CommitStats> getCommitStatFromList(String user, String repo, ArrayList<String> list) throws Exception {
+        int size = list.size();
+        ArrayList<CommitStats> commitStatList = new ArrayList<>();
+        for(String s: list){
+            commitStatList.add(getCommitStatByID(user, repo, s).get());
+        }
+        return commitStatList;
     }
 }

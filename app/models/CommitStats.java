@@ -66,6 +66,6 @@ public class CommitStats {
                 ", addition=" + addition +
                 ", deletion=" + deletion +
                 ", sha='" + sha + '\'' +
-                '}';
+                "}\n";
     }
 }

@@ -1,5 +1,5 @@
 @import play.mvc.Http.Request
-@(commits: Map[String, Integer])(implicit request: Request)
+@(commits: Map[Commits, Integer])(implicit request: Request)
 
 @main("Commit Details") {
 @for((key, value) <- commits){
