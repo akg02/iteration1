@@ -1,6 +1,11 @@
 package controllers;
 
 import com.google.inject.Inject;
+import models.GithubClient;
+import models.Issue;
+import models.IssueService;
+import models.SearchResult;
+import models.SearchService;
 import models.*;
 import play.data.Form;
 import play.data.FormFactory;
@@ -11,9 +16,11 @@ import play.mvc.Result;
 import services.CommitService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Future;
 
 /**
  * @author Hop Nguyen
@@ -26,6 +33,8 @@ public class SearchController extends Controller {
     private final Form<SearchForm> searchForm;
     private final MessagesApi messagesApi;
     private final SearchService searchService;
+    private final IssueService issueService;
+
     private final CommitService commitService;
 
     @Inject
@@ -34,6 +43,7 @@ public class SearchController extends Controller {
         this.searchForm = formFactory.form(SearchForm.class);
         this.messagesApi = messagesApi;
         this.searchService = new SearchService(github);
+        this.issueService  = new IssueService(github);
         this.commitService = new CommitService(github);
     }
 
@@ -86,6 +96,16 @@ public class SearchController extends Controller {
         String fullName = user + "/" + repo;
         return CompletableFuture.completedFuture(ok(views.html.repository.render(fullName)));
     }
+
+    
+    public CompletionStage<Result> issueStatistics(String user, String repo,Http.Request request){
+    	CompletionStage<Result> result = issueService.getIssueStatistics(user, repo).thenApplyAsync(
+    			op -> ok(views.html.issuesStatistics.render(op, request)));
+    			
+    	return result;
+    }
+}
+
 
     /**
      * Route for Commits
