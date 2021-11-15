@@ -1,4 +1,4 @@
-@(repoDetails: RepositoryProfile)
+@(repoDetails: RepositoryProfile, user: String)
 
 @main("Repository:" + repoDetails) {
 
@@ -6,7 +6,9 @@
 
 <div class="border" style="margin-top:20px;">
     <ul>
-        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Name of Repository : </strong> @repoDetails.name </p></li>
+        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Name : </strong> @repoDetails.name </p></li>
+        <hr class="my-1">
+        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> User : </strong><a href="/profile/@user">@user</a> </p></li>
         <hr class="my-1">
         <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Description : </strong> @repoDetails.description </p></li>
         <hr class="my-1">
@@ -22,11 +24,18 @@
         } else {
         <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Topics :  </strong>
         @for(topic <- repoDetails.topics) {
-        <a href="/topic/@topic" class="badge badge-secondary">@topic</a> , &nbsp;
+        <a href="/topic/@topic" class="badge badge-secondary">@topic</a> &nbsp;
         }
         </p> </li>
         }
-
     </ul>
+</div>
+<br>
+
+<div class="border" style="margin-top:20px;">
+    <h5><a href="">Issues</a></h5>
+    <p>@repoDetails.issues</p>
+
+
 </div>
 }

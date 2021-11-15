@@ -82,6 +82,7 @@ public class SearchController extends Controller {
      * Route for repository
      */
     public CompletionStage<Result> repository(String user, String repo) {
-        return github.getRepositoryDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd)));
+
+        return github.getRepositoryDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
     }
 }

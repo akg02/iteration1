@@ -10,7 +10,7 @@ import java.util.concurrent.CompletionStage;
  * @version 1
  */
 public class RepositoryProfile {
-    //public List<String> issues;
+    public String issues;
     public List<String> topics;
     public String name;
     public String description;
@@ -24,15 +24,14 @@ public class RepositoryProfile {
     public RepositoryProfile(){
     }
 
-    public RepositoryProfile(String name, String description, String owner, Date created_at, Date updated_at, int stargazers_count, List<String> issues, Map<String, String> otherDetails, List<String> topics){
+    public RepositoryProfile(String name, String description, String owner, Date created_at, Date updated_at, int stargazers_count, String issues, Map<String, String> otherDetails, List<String> topics){
         this.name = name;
         this.description = description;
-        //this.owner = owner;
         this.created_at = created_at;
         this.updated_at = updated_at;
         this.stargazers_count = stargazers_count;
         this.topics = topics;
-        //this.issues = issues;
+        this.issues = issues;
         //this.otherDetails = otherDetails;
     }
 
