@@ -1,15 +1,14 @@
 package controllers;
 
 import com.google.inject.Inject;
-import models.GithubClient;
-import models.SearchResult;
-import models.SearchService;
+import models.*;
 import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import services.CommitService;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +26,7 @@ public class SearchController extends Controller {
     private final Form<SearchForm> searchForm;
     private final MessagesApi messagesApi;
     private final SearchService searchService;
+    private final CommitService commitService;
 
     @Inject
     public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi) {
@@ -34,6 +34,7 @@ public class SearchController extends Controller {
         this.searchForm = formFactory.form(SearchForm.class);
         this.messagesApi = messagesApi;
         this.searchService = new SearchService(github);
+        this.commitService = new CommitService(github);
     }
 
     /**
@@ -84,5 +85,15 @@ public class SearchController extends Controller {
     public CompletionStage<Result> repository(String user, String repo) {
         String fullName = user + "/" + repo;
         return CompletableFuture.completedFuture(ok(views.html.repository.render(fullName)));
+    }
+
+    /**
+     * Route for Commits
+     */
+    public CompletionStage<Result> commits(String user, String repo, Http.Request request) throws Exception {
+        CompletionStage<Result> resultCompletionStage =  commitService.getCommitStats(user,repo)
+                .thenApplyAsync(output -> ok(views.html.commits.render(output, request)));
+
+        return resultCompletionStage;
     }
 }
