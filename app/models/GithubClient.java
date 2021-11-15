@@ -1,20 +1,16 @@
 package models;
 
-import java.util.List;
-import java.util.concurrent.CompletionStage;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.typesafe.config.Config;
-
 import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
 
-
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -27,38 +23,29 @@ import java.util.concurrent.CompletionStage;
 public class GithubClient {
 
     private final WSClient client;
-    private final WSClient statClient;
     private final String baseURL;
     private final String token;
-    private ArrayList<CommitStats> list;
-
-    public ArrayList<CommitStats> getList() {
-        return list;
-    }
-
-    public void setList(ArrayList<CommitStats> list) {
-        this.list = list;
-    }
 
     @Inject
-    public GithubClient(WSClient client, WSClient statClient, Config config) {
+    public GithubClient(WSClient client, Config config) {
         this.client = client;
-        this.statClient = statClient;
         this.baseURL = config.getString("github.url");
         this.token = config.getString("github.token");
-        this.list = new ArrayList<>();
     }
 
-	public CompletionStage<SearchResult> searchRepositories(String query, boolean isTopic) {
-		WSRequest request = client.url(baseURL + "/search/repositories");
-		return request.addHeader("Accept", "application/vnd.github.v3+json")
-				.addQueryParameter("q", (isTopic ? "topic:" : "") + query).addQueryParameter("sort", "updated")
-				.addQueryParameter("per_page", "10").get().thenApply(r -> {
-					SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
-					searchResult.input = query;
-					return searchResult;
-				});
-	}
+    public CompletionStage<SearchResult> searchRepositories(String query, boolean isTopic) {
+        WSRequest request = client.url(baseURL + "/search/repositories");
+        return request
+                .addHeader("Authorization", token)
+                .addHeader("Accept", "application/vnd.github.v3+json")
+                .addQueryParameter("q", (isTopic ? "topic:" : "") + query)
+                .addQueryParameter("sort", "updated")
+                .addQueryParameter("per_page", "10").get().thenApply(r -> {
+                    SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
+                    searchResult.input = query;
+                    return searchResult;
+                });
+    }
 
 	public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {
 		WSRequest request = client.url(baseURL + "/repos/" + authorName + "/" + repositoryName + "/issues");
