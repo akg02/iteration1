@@ -15,9 +15,10 @@ import java.util.concurrent.CompletionStage;
  * @version 1: Hop Nguyen implements the project framework, search, and topic feature.
  */
 public class GithubClient {
-    public final WSClient client;
-    public final WSClient statClient;
-    public final String baseURL;
+    private final WSClient client;
+    private final WSClient statClient;
+    private final String baseURL;
+    private final String token;
     private ArrayList<CommitStats> list;
 
     public ArrayList<CommitStats> getList() {
@@ -33,6 +34,7 @@ public class GithubClient {
         this.client = client;
         this.statClient = statClient;
         this.baseURL = config.getString("github.url");
+        this.token = config.getString("github.token");
         this.list = new ArrayList<>();
     }
 
@@ -54,8 +56,8 @@ public class GithubClient {
         WSRequest request = client.url(baseURL + "/repos/"+userName+"/" +
                 repoName+"/commits");
         return request.addHeader("Accept", "application/vnd.github.v3+json")
-                .addHeader("Authorization", "token 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")
-                .addQueryParameter("per_page", "5")
+                .addHeader("Authorization", token)
+                .addQueryParameter("per_page", "100")
                 .get()
                 .thenApplyAsync( r -> {
                     ArrayList<String> commitIDList = new ArrayList<>();
@@ -73,7 +75,7 @@ public class GithubClient {
                 repoName+"/commits/"+commitID);
 
         return request.addHeader("Accept", "application/vnd.github.v3+json")
-                .addHeader("Authorization", "token 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")
+                .addHeader("Authorization", token)
                 .addQueryParameter("per_page", "5")
                 .get()
                 .thenApplyAsync( r-> {
@@ -88,7 +90,6 @@ public class GithubClient {
     }
 
     public ArrayList<CommitStats> getCommitStatFromList(String user, String repo, ArrayList<String> list) throws Exception {
-        int size = list.size();
         ArrayList<CommitStats> commitStatList = new ArrayList<>();
         for(String s: list){
             commitStatList.add(getCommitStatByID(user, repo, s).get());

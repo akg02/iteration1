@@ -1,8 +1,19 @@
 @import play.mvc.Http.Request
-@(commits: Map[Commits, Integer])(implicit request: Request)
+@(commits: List[Map[String, Integer]])(implicit request: Request)
 
 @main("Commit Details") {
-@for((key, value) <- commits){
-<li><a href="/profile/@key">@key</a> Count: @value</li>
+<ol>
+@for((key, value) <- commits.get(0)){
+<li><a href="/profile/@key">@key</a></li>
+    <ul>
+        <li>Count: @commits.get(0).get(key)</li>
+        <li>MaxAddition: @commits.get(1).get(key)</li>
+        <li>Min Addition: @commits.get(2).get(key)</li>
+        <li>Average Addition: @(commits.get(3).get(key)/commits.get(0).get(key))</li>
+        <li>Max Deletion: @commits.get(4).get(key)</li>
+        <li>Min Deletion: @commits.get(5).get(key)</li>
+        <li>Average Deletion: @(commits.get(6).get(key)/commits.get(0).get(key))</li>
+    </ul>
 }
+</ol>
 }

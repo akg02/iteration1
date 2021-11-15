@@ -8,8 +8,8 @@ import play.i18n.MessagesApi;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import services.CommitService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -91,7 +91,6 @@ public class SearchController extends Controller {
      * Route for Commits
      */
     public CompletionStage<Result> commits(String user, String repo, Http.Request request) throws Exception {
-        String fullName = user + "/" + repo;
         CompletionStage<Result> resultCompletionStage =  commitService.getCommitStats(user,repo)
                 .thenApplyAsync(output -> ok(views.html.commits.render(output, request)));
 
