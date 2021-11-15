@@ -57,6 +57,14 @@ public class GithubClient {
                 });
     }
 
+    /**
+     * Method to call live GitHub api to fetch issues
+     * @author Meet Mehta
+     * @param authorName username of github repository
+     * @param repositoryName repository name
+     * @return CompletionStage object of list of issues
+     * 
+     */
 	public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {
 		WSRequest request = client.url(baseURL + "/repos/" + authorName + "/" + repositoryName + "/issues");
 		ObjectMapper objectMapper = new ObjectMapper();
