@@ -6,12 +6,14 @@ import models.Issue;
 import models.IssueService;
 import models.SearchResult;
 import models.SearchService;
+import models.*;
 import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import services.CommitService;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,8 @@ public class SearchController extends Controller {
     private final SearchService searchService;
     private final IssueService issueService;
 
+    private final CommitService commitService;
+
     @Inject
     public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi) {
         this.github = github;
@@ -40,6 +44,7 @@ public class SearchController extends Controller {
         this.messagesApi = messagesApi;
         this.searchService = new SearchService(github);
         this.issueService  = new IssueService(github);
+        this.commitService = new CommitService(github);
     }
 
     /**
@@ -91,11 +96,24 @@ public class SearchController extends Controller {
         String fullName = user + "/" + repo;
         return CompletableFuture.completedFuture(ok(views.html.repository.render(fullName)));
     }
+
     
     public CompletionStage<Result> issueStatistics(String user, String repo,Http.Request request){
     	CompletionStage<Result> result = issueService.getIssueStatistics(user, repo).thenApplyAsync(
     			op -> ok(views.html.issuesStatistics.render(op, request)));
     			
     	return result;
+    }
+}
+
+
+    /**
+     * Route for Commits
+     */
+    public CompletionStage<Result> commits(String user, String repo, Http.Request request) throws Exception {
+        CompletionStage<Result> resultCompletionStage =  commitService.getCommitStats(user,repo)
+                .thenApplyAsync(output -> ok(views.html.commits.render(output, request)));
+
+        return resultCompletionStage;
     }
 }
