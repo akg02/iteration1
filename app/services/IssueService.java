@@ -1,4 +1,4 @@
-package models;
+package services;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +10,15 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
+import models.GithubClient;
+import models.Issue;
+
+/**
+ * Provides method to work with Issues of a github repository
+ * @author Meet Mehta
+ * @version 1 
+ *
+ */
 public class IssueService {
 
 	private final GithubClient github;
@@ -19,8 +28,16 @@ public class IssueService {
 		this.github = github;
 	}
 
+	/**
+	 * Method to get word-level statistics of issue title for given repository
+	 * @author Meet Mehta
+	 * @param user username of the repository
+	 * @param repo repository name 
+	 * @return CompletionStage object of Map having count of each word in issue titles sorted in descending order
+	 */
 	public CompletionStage<Map<String, Integer>> getIssueStatistics(String user, String repo) {
 		CompletionStage<List<Issue>> issues = this.getIssues(user, repo);
+		
 		CompletionStage<List<String>> titles = issues.thenApplyAsync(issue -> issue.stream()
 				.map(s -> s.getTitle().split(" ")).flatMap(Arrays::stream).collect(Collectors.toList()));
 		CompletionStage<Map<String, Integer>> issueStatistics = titles
@@ -31,6 +48,13 @@ public class IssueService {
 		return issueStatistics;
 	}
 
+	/**
+	 * Method to fetch issues
+	 * @author Meet Mehta
+	 * @param user username of the repository
+	 * @param repo repository name
+	 * @return CompletionStage of list of issues
+	 */
 	public CompletionStage<List<Issue>> getIssues(String user, String repo) {
 		return github.getIssues(user, repo);
 
