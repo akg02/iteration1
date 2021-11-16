@@ -2,7 +2,6 @@ package controllers;
 
 import com.google.inject.Inject;
 import models.GithubClient;
-import models.IssueService;
 import models.SearchHistory;
 import models.SearchResult;
 import play.data.Form;
@@ -12,6 +11,7 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import services.CommitService;
+import services.IssueService;
 
 import java.util.List;
 import java.util.UUID;
@@ -89,11 +89,19 @@ public class SearchController extends Controller {
      * Route for repository
      */
     public CompletionStage<Result> repository(String user, String repo) {
-        String fullName = user + "/" + repo;
-        return CompletableFuture.completedFuture(ok(views.html.repository.render(fullName)));
+
+        return github.getRepositoryDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
     }
 
-    
+    /**
+     * 
+     * Controller Method for api : /issueStatistics
+     * @author Meet Mehta
+     * @param user username of github repository
+     * @param repo repository name
+     * @param request Http.Request 
+     * @return page displaying word count of issues title in descending order. 
+     */
     public CompletionStage<Result> issueStatistics(String user, String repo,Http.Request request){
     	CompletionStage<Result> result = issueService.getIssueStatistics(user, repo).thenApplyAsync(
     			op -> ok(views.html.issuesStatistics.render(op, request)));
