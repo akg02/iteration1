@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Hop Nguyen
@@ -66,7 +67,6 @@ public class GithubClient {
                     return searchResult;
                 });
     }
-
     /**
      * Method to call live GitHub api to fetch issues
      *
@@ -75,9 +75,20 @@ public class GithubClient {
      * @return CompletionStage object of list of issues
      * @author Meet Mehta
      */
-    public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {
-        WSRequest request = client.url(baseURL + "/repos/" + authorName + "/" + repositoryName + "/issues");
-        ObjectMapper objectMapper = new ObjectMapper();
+
+	public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {
+		WSRequest request = client.url(baseURL + "/repos/" + authorName + "/" + repositoryName + "/issues");
+		ObjectMapper objectMapper = new ObjectMapper();
+
+		return request.addHeader("Authorization", token)
+				.addHeader("Accept", "application/vnd.github.v3+json").get().thenApply(r -> {
+			List<Issue> issues = null;
+			try {
+				
+				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				issues = objectMapper.readValue(r.asJson().toPrettyString(), new TypeReference<List<Issue>>() {
+				
+				});
 
         return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .addHeader("sort", "created")
@@ -97,32 +108,50 @@ public class GithubClient {
         });
     }
 
-
-    public CompletableFuture<ArrayList<String>> getAllCommitList(String userName, String repoName) {
-        WSRequest request = client.url(baseURL + "/repos/" + userName + "/" +
-                repoName + "/commits");
+    /**
+     * By using username and repository name, function will make one arraylist of id of latest 100 commits
+     * If there are less than 100 commits then it will take all commits possible.
+     * @param userName github username of owner of repository
+     * @param repoName repository name
+     * @return Arraylist containing at most 100 latest commits' ID.
+     *
+     * @author Smit Parmar
+     */
+    public ArrayList<String> getAllCommitList(String userName, String repoName, int perPage) throws ExecutionException, InterruptedException {
+        WSRequest request = client.url(baseURL + "/repos/"+userName+"/" +
+                repoName+"/commits");
         return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .addHeader("Authorization", token)
-                .addQueryParameter("per_page", "100")
+                .addQueryParameter("per_page",  new Integer(perPage).toString())
                 .get()
                 .thenApplyAsync(r -> {
                     ArrayList<String> commitIDList = new ArrayList<>();
-                    int f = 0;
-                    while (r.asJson().get(f) != null) {
-                        commitIDList.add(r.asJson().get(f).get("sha").asText());
-                        f++;
-                    }
+                   int f = 0;
+                   while(r.asJson().get(f)!=null){
+                       System.out.println(r.asJson().get(f).get("sha").asText());
+                       commitIDList.add(r.asJson().get(f).get("sha").asText());
+                       f++;
+                   }
+
                     return commitIDList;
-                }).toCompletableFuture();
+                }).toCompletableFuture().get();
     }
 
-    public CompletableFuture<CommitStats> getCommitStatByID(String userName, String repoName, String commitID) {
-        WSRequest request = client.url(baseURL + "/repos/" + userName + "/" +
-                repoName + "/commits/" + commitID);
 
+    /**
+     * This function will return new CommitStats model object which has username, email, sha, addition and deletion
+     * @param userName github username of owner of repository
+     * @param repoName repository name
+     * @param commitID ID of commit
+     * @return CommitStats object
+     *
+     * @author Smit Parmar
+     */
+    public CompletableFuture<CommitStats> getCommitStatByID(String userName, String repoName, String commitID){
+        WSRequest request = client.url(baseURL + "/repos/"+userName+"/" +
+                repoName+"/commits/"+commitID);
         return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .addHeader("Authorization", token)
-                .addQueryParameter("per_page", "5")
                 .get()
                 .thenApplyAsync(r -> {
                     CommitStats commitStats;
@@ -135,13 +164,13 @@ public class GithubClient {
                 }).toCompletableFuture();
     }
 
-
     /**
      * @param user name of the user
      * @param repo name of the repository
      * @return Object of RepositoryProfile
      * @author Sagar Sanghani
      */
+      
     public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo, List<RepoIssue> issueList) {
         WSRequest request = client.url(baseURL + "/repos/" + user + "/" + repo);
         return request.addHeader("Accept", "application/vnd.github.v3+json")
@@ -171,13 +200,27 @@ public class GithubClient {
                 });
     }
 
-    public ArrayList<CommitStats> getCommitStatFromList (String user, String repo, ArrayList < String > list) throws
-            Exception {
+    /**
+     * By using loop, this function will give list of commitStats of object on which we can apply stream function.
+     *
+     * @param user github username of owner of repository
+     * @param repo repository name
+     * @param list contains all Commit IDs.
+     * @return List of CommitStat Objet
+     *
+     * @author Smit Parmar
+     */
+    public ArrayList<CommitStats> getCommitStatFromList(String user, String repo, ArrayList<String> list)  {
         ArrayList<CommitStats> commitStatList = new ArrayList<>();
-        for (String s : list) {
-            commitStatList.add(getCommitStatByID(user, repo, s).get());
+        for(String s: list){
+            try {
+                commitStatList.add(getCommitStatByID(user, repo, s).get());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         }
         return commitStatList;
-
     }
 }

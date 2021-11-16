@@ -5,6 +5,8 @@ import com.typesafe.config.Config;
 import models.GithubClient;
 import models.Repository;
 import models.SearchResult;
+
+import org.eclipse.jetty.http.HttpStatus;
 import org.junit.Test;
 import play.Application;
 import play.inject.Bindings;
@@ -149,5 +151,39 @@ public class SearchControllerTest extends WithApplication {
                 .uri("/repository/concordia/android");
         Result result = Helpers.route(app, request);
         assertEquals(Http.Status.OK, result.status());
+    }
+    
+    /**
+     * Test case issueStatistics() method
+     * 
+     * @author Meet Mehta
+     * 
+     */
+    @Test
+    public void testIssueStatistics() {
+    	Http.RequestBuilder request = new Http.RequestBuilder().method(Helpers.GET).uri("/issueStatistics/meetmehta1198/StudentAttendanceManagement");
+    	Result result = Helpers.route(app, request);
+    	assertEquals(Http.Status.OK,result.status());
+    	String html = Helpers.contentAsString(result);
+    	assertTrue(html.contains("<li>running : 1</li>"));
+    	assertTrue(html.contains("<li>Help : 1</li>"));
+    	assertTrue(html.contains("<li>this : 1</li>"));
+    	assertTrue(html.contains("<li>for : 1</li>"));
+    	assertTrue(html.contains("<li>project : 1</li>"));
+    }
+
+    /**
+     *
+     * @author Smit Parmar
+     */
+    @Test
+    public void testCommitStatistics() {
+        Http.RequestBuilder request = new Http.RequestBuilder().method(Helpers.GET)
+                .uri("/commits/smituparmar/MedicoGraph");
+        Result result = Helpers.route(app, request);
+        assertEquals(Http.Status.OK, result.status());
+        String html = Helpers.contentAsString(result);
+        assertTrue(html.contains("<a href=\"/profile/smituparmar\">smituparmar</a>"));
+        assertTrue(html.contains("<li>Count: 19</li>"));
     }
 }
