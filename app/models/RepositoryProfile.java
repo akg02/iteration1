@@ -16,14 +16,14 @@ public class RepositoryProfile {
     public Date created_at;
     public Date updated_at;
     public int stargazers_count;
-    public List<RepoIssue> issues;
+    public List<Issue> issues;
     public int forks_count;
 
 
     public RepositoryProfile(){
     }
 
-    public RepositoryProfile(String name, String description, Date created_at, Date updated_at, int stargazers_count, List<RepoIssue> issues, List<String> topics, int forks_count){
+    public RepositoryProfile(String name, String description, Date created_at, Date updated_at, int stargazers_count, List<Issue> issues, List<String> topics, int forks_count){
         this.name = name;
         this.description = description;
         this.created_at = created_at;
