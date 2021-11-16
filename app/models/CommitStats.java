@@ -1,5 +1,9 @@
 package models;
 
+/**
+ * Model class which stored data after making an API call
+ * @author Smit Parmar
+ */
 public class CommitStats {
     private String name;
     private String email;
@@ -7,9 +11,15 @@ public class CommitStats {
     private int deletion;
     private String sha;
 
+    /**
+     * Default Constructor
+     */
     public CommitStats() {
     }
 
+    /**
+     * This is parameterised Constructor
+     */
     public CommitStats(String author, String email, int addition, int deletion, String sha) {
         this.name = author;
         this.email = email;

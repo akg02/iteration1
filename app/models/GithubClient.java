@@ -57,14 +57,6 @@ public class GithubClient {
                 });
     }
 
-    /**
-     * Method to call live GitHub api to fetch issues
-     * @author Meet Mehta
-     * @param authorName username of github repository
-     * @param repositoryName repository name
-     * @return CompletionStage object of list of issues
-     * 
-     */
 	public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {
 		WSRequest request = client.url(baseURL + "/repos/" + authorName + "/" + repositoryName + "/issues");
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -85,8 +77,13 @@ public class GithubClient {
 	}
 
 
-
-
+    /**
+     * By using username and repository name, function will make one arraylist of id of latest 100 commits
+     * If there are less than 100 commits then it will take all commits possible.
+     * @param userName github username of owner of repository
+     * @param repoName repository name
+     * @return Arraylist containing at most 100 latest commits' ID.
+     */
     public CompletableFuture<ArrayList<String>> getAllCommitList(String userName, String repoName){
         WSRequest request = client.url(baseURL + "/repos/"+userName+"/" +
                 repoName+"/commits");
@@ -105,6 +102,13 @@ public class GithubClient {
                 }).toCompletableFuture();
     }
 
+    /**
+     * This function will return new CommitStats model object which has username, email, sha, addition and deletion
+     * @param userName github username of owner of repository
+     * @param repoName repository name
+     * @param commitID ID of commit
+     * @return CommitStats object
+     */
     public CompletableFuture<CommitStats> getCommitStatByID(String userName, String repoName, String commitID){
         WSRequest request = client.url(baseURL + "/repos/"+userName+"/" +
                 repoName+"/commits/"+commitID);
@@ -124,14 +128,13 @@ public class GithubClient {
                 }).toCompletableFuture();
     }
 
-
     /**
      * @author Sagar Sanghani
      * @param user name of the user
      * @param repo name of the repository
      * @return Object of RepositoryProfile
      */
-    public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo){
+    public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo) {
         WSRequest request = client.url(baseURL + "/repos/" + user + "/" + repo);
         return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .get()
@@ -139,14 +142,22 @@ public class GithubClient {
                     RepositoryProfile repositoryProfile = Json.fromJson(r.asJson(), RepositoryProfile.class);
                     return repositoryProfile;
                 });
+    }
 
+    /**
+     * By using loop, this function will give list of commitStats of object on which we can apply stream function.
+     *
+     * @param user github username of owner of repository
+     * @param repo repository name
+     * @param list contains all Commit IDs.
+     * @return List of CommitStat Objet
+     */
     public ArrayList<CommitStats> getCommitStatFromList(String user, String repo, ArrayList<String> list) throws Exception {
         ArrayList<CommitStats> commitStatList = new ArrayList<>();
         for(String s: list){
             commitStatList.add(getCommitStatByID(user, repo, s).get());
         }
         return commitStatList;
-
     }
 
 }

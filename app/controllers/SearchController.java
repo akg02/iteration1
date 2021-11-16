@@ -110,13 +110,25 @@ public class SearchController extends Controller {
     }
 
 
-
     /**
-     * Route for Commits
+     * Return Commit Statistics Page.
+     * This page contains number of commits and max, min and average deletion by top 10 committers in latest 100 commits.
+     * @param user gihub username of owner of repository
+     * @param repo repository name
+     * @param request request parameter
+     * @return commit statistcs page
+     * @author Smit Parmar
+     *
      */
-    public CompletionStage<Result> commits(String user, String repo, Http.Request request) throws Exception {
-        CompletionStage<Result> resultCompletionStage =  commitService.getCommitStats(user,repo)
-                .thenApplyAsync(output -> ok(views.html.commits.render(output, request)));
+    public CompletionStage<Result> commits(String user, String repo, Http.Request request)  {
+        CompletionStage<Result> resultCompletionStage = null;
+        try{
+            resultCompletionStage =  commitService.getCommitStats(user,repo)
+                    .thenApplyAsync(output -> ok(views.html.commits.render(output, request)));
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
         return resultCompletionStage;
     }
