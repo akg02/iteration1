@@ -181,5 +181,51 @@ public class GithubClient {
         }
         return commitStatList;
     }
+    
+    /**
+     * Displays user profile information
+     * 
+     * @author Joon Seung Hwang
+     * @param user name of the user
+     * @return object of ProfileInfo
+     */
+    public CompletionStage<ProfileInfo> displayUserProfile(String user){
+    	WSRequest request = client.url(baseURL + "/users/" + user);
+    	return request.addHeader("Accept", "application/vnd.github.v3+json")
+                .addHeader("Authorization", token)
+    			.get()
+    			.thenApply(r -> {
+    				ProfileInfo profileInfo = Json.fromJson(r.asJson(), ProfileInfo.class);
+    				return profileInfo;
+    			});
+    	
+    }
+    
+    /**
+     * 
+     * to be filled out
+     * 
+     * Gathers the list of repositories of a user
+     * that would be added to the user profile
+     * 
+     * @author Joon Seung Hwang
+   
+     */
+    public CompletableFuture<ArrayList<String>> getAllRepoList(String user){
+    	WSRequest request = client.url(baseURL + "/users/" + user + "/repos");
+    	return request.addHeader("Accept", "application/vnd.github.v3+json")
+    			.get()
+    			.thenApply(r -> {
+    				ArrayList<String> repoList = new ArrayList<>();
+    				 int f = 0;
+                     while(r.asJson().get(f)!=null){
+                    	 repoList.add(r.asJson().get(f).get("name").asText());
+                    	 f++;
+                     }
+    				return repoList;
+    				
+    			}).toCompletableFuture();
+    	
+    }
 
 }

@@ -96,7 +96,8 @@ public class SearchController extends Controller {
      * Route for profile
      */
     public CompletionStage<Result> profile(String user) {
-        return CompletableFuture.completedFuture(ok(views.html.profile.render(user)));
+    	return github.displayUserProfile(user).thenApply(r -> ok(views.html.profile.render(r)));
+        //return CompletableFuture.completedFuture(ok(views.html.profile.render(user)));
     }
 
     /**

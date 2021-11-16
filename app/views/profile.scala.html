@@ -1,5 +1,15 @@
-@(user: String)
+@(details: ProfileInfo)
 
-@main("Profile of " + user) {
-    Profile: <a href="https://github.com/@user">@user</a>
+@main("Profile of " + details ) {
+    <li><Strong>Profile page: </Strong>  <a href="https://github.com/@details.login">@details.login</a>
+    <li><Strong>User name: </Strong>@details.name 
+    <li><Strong>Bio: </Strong> @details.bio
+    <li><Strong>Company: </Strong>@details.company
+    <li><Strong>Blog: </Strong>@details.blog
+    <li><Strong>Location: </Strong> @details.location
+    <li><Strong>Email: </Strong> @details.email
+    <li><Strong>Twitter username: </Strong>@details.twitter_username    		
+    <li><Strong>Followers: </Strong> @details.followers
+    <li><Strong>Following: </Strong>@details.following
+    
 }
