@@ -32,6 +32,7 @@ public class SearchController extends Controller {
     private final IssueService issueService;
 
     private final CommitService commitService;
+    
 
     @Inject
     public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi) {
