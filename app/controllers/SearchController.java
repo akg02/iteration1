@@ -1,6 +1,5 @@
 package controllers;
 
-
 import com.google.inject.Inject;
 import models.GithubClient;
 import models.SearchHistory;
@@ -13,7 +12,6 @@ import play.mvc.Http;
 import play.mvc.Result;
 import services.CommitService;
 import services.IssueService;
-import services.RepositoryProfileService;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,9 +30,9 @@ public class SearchController extends Controller {
     private final MessagesApi messagesApi;
     private final SearchHistory searchHistory;
     private final IssueService issueService;
-    private final CommitService commitService;
-    private final RepositoryProfileService repositoryProfileService;
 
+    private final CommitService commitService;
+    
 
     @Inject
     public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi) {
@@ -44,7 +42,6 @@ public class SearchController extends Controller {
         this.searchHistory = new SearchHistory();
         this.issueService  = new IssueService(github);
         this.commitService = new CommitService(github);
-        this.repositoryProfileService = new RepositoryProfileService(github);
     }
 
     /**
@@ -90,15 +87,11 @@ public class SearchController extends Controller {
     }
 
     /**
-     * Controller Method for api : /repository
-     * @author Sagar Sanghani
-     * @param user username of github repository
-     * @param repo repository name
-     * @return page displaying word count of issues title in descending order.
+     * Route for repository
      */
-    public CompletionStage<Result> repository(String user, String repo) throws Exception {
-        CompletionStage<Result> result = repositoryProfileService.getRepoDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
-        return result;
+    public CompletionStage<Result> repository(String user, String repo) {
+
+        return github.getRepositoryDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
     }
 
     /**

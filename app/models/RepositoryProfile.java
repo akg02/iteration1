@@ -2,7 +2,6 @@ package models;
 
 import com.google.inject.Inject;
 
-
 import java.util.*;
 import java.util.concurrent.CompletionStage;
 
@@ -11,21 +10,21 @@ import java.util.concurrent.CompletionStage;
  * @version 1
  */
 public class RepositoryProfile {
-    //public List<String> issues;
+    public String issues;
     public List<String> topics;
     public String name;
     public String description;
+    //public String owner;
     public Date created_at;
     public Date updated_at;
     public int stargazers_count;
-    public List<RepoIssue> issues;
-    public int forks_count;
+    //public Map<String, String> otherDetails;
 
 
     public RepositoryProfile(){
     }
 
-    public RepositoryProfile(String name, String description, Date created_at, Date updated_at, int stargazers_count, List<RepoIssue> issues, List<String> topics, int forks_count){
+    public RepositoryProfile(String name, String description, String owner, Date created_at, Date updated_at, int stargazers_count, String issues, Map<String, String> otherDetails, List<String> topics){
         this.name = name;
         this.description = description;
         this.created_at = created_at;
@@ -33,7 +32,7 @@ public class RepositoryProfile {
         this.stargazers_count = stargazers_count;
         this.topics = topics;
         this.issues = issues;
-        this.forks_count = forks_count;
+        //this.otherDetails = otherDetails;
     }
 
 }
