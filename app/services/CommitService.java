@@ -37,7 +37,7 @@ public class CommitService {
      */
     public CompletionStage<List<Map<String, Integer>>> getCommitStats(String user, String repo) {
         try{
-            ArrayList<String> commitIdList = github.getAllCommitList(user, repo).get();
+            ArrayList<String> commitIdList = github.getAllCommitList(user, repo, 100);
             ArrayList<CommitStats> commitStatsList = github.getCommitStatFromList(user, repo, commitIdList);
 
             return CompletableFuture.supplyAsync( () -> {
