@@ -10,6 +10,6 @@ scalaVersion := "2.13.6"
 libraryDependencies ++= Seq(
   guice,
   ws,
-  "org.mockito" % "mockito-core" % "2.10.0" % "test",
-  ehcache
+  // Java11 requires mockito 4.0.0
+  "org.mockito" % "mockito-core" % "4.0.0" % "test"
 )

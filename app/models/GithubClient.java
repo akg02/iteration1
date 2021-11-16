@@ -1,65 +1,70 @@
 package models;
 
-import java.util.List;
-import java.util.concurrent.CompletionStage;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.typesafe.config.Config;
-
 import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
 
-
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-
 /**
  * @author Hop Nguyen
- * @version 1: Hop Nguyen implements the project framework, search, and topic
- *          feature.
+ * @version 1: Hop Nguyen implements the project framework, search, and topic feature.
+ * The GithubClient class, to hold the content for a Github client
  */
 public class GithubClient {
-
+    /** The WSClient client */
     private final WSClient client;
-    private final WSClient statClient;
+    /** The String baseURL */
     private final String baseURL;
+    /** The authorization Github token */
     private final String token;
-    private ArrayList<CommitStats> list;
 
-    public ArrayList<CommitStats> getList() {
-        return list;
-    }
-
-    public void setList(ArrayList<CommitStats> list) {
-        this.list = list;
-    }
-
+    /** The constructor */
     @Inject
-    public GithubClient(WSClient client, WSClient statClient, Config config) {
+    public GithubClient(WSClient client, Config config) {
         this.client = client;
-        this.statClient = statClient;
         this.baseURL = config.getString("github.url");
         this.token = config.getString("github.token");
-        this.list = new ArrayList<>();
     }
 
-	public CompletionStage<SearchResult> searchRepositories(String query, boolean isTopic) {
-		WSRequest request = client.url(baseURL + "/search/repositories");
-		return request.addHeader("Accept", "application/vnd.github.v3+json")
-				.addQueryParameter("q", (isTopic ? "topic:" : "") + query).addQueryParameter("sort", "updated")
-				.addQueryParameter("per_page", "10").get().thenApply(r -> {
-					SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
-					searchResult.input = query;
-					return searchResult;
-				});
-	}
+    /**
+     * The method searRepositories, to search the repositories based on the given query and whether it's a topic
+     * @param query the given query
+     * @param isTopic indicates if the query based on the topic
+     * @return the search results
+     */
+    public CompletionStage<SearchResult> searchRepositories(String query, boolean isTopic) {
+        WSRequest request = client.url(baseURL + "/search/repositories");
+        return request
+                .addHeader("Authorization", token)
+                .addHeader("Accept", "application/vnd.github.v3+json")
+                .addQueryParameter("q", (isTopic ? "topic:" : "") + query)
+                .addQueryParameter("sort", "updated")
+                .addQueryParameter("per_page", "10")
+                .get()
+                .thenApply(r -> {
+                    SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
+                    searchResult.input = query;
+                    return searchResult;
+                });
+    }
 
+    /**
+     * Method to call live GitHub api to fetch issues
+     * @author Meet Mehta
+     * @param authorName username of github repository
+     * @param repositoryName repository name
+     * @return CompletionStage object of list of issues
+     * 
+     */
 	public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {
 		WSRequest request = client.url(baseURL + "/repos/" + authorName + "/" + repositoryName + "/issues");
 		ObjectMapper objectMapper = new ObjectMapper();

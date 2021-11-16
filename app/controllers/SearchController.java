@@ -2,11 +2,8 @@ package controllers;
 
 import com.google.inject.Inject;
 import models.GithubClient;
-import models.Issue;
-import models.IssueService;
+import models.SearchHistory;
 import models.SearchResult;
-import models.SearchService;
-import models.*;
 import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
@@ -14,13 +11,12 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import services.CommitService;
+import services.IssueService;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Future;
 
 /**
  * @author Hop Nguyen
@@ -32,7 +28,7 @@ public class SearchController extends Controller {
     private final GithubClient github;
     private final Form<SearchForm> searchForm;
     private final MessagesApi messagesApi;
-    private final SearchService searchService;
+    private final SearchHistory searchHistory;
     private final IssueService issueService;
 
     private final CommitService commitService;
@@ -42,7 +38,7 @@ public class SearchController extends Controller {
         this.github = github;
         this.searchForm = formFactory.form(SearchForm.class);
         this.messagesApi = messagesApi;
-        this.searchService = new SearchService(github);
+        this.searchHistory = new SearchHistory();
         this.issueService  = new IssueService(github);
         this.commitService = new CommitService(github);
     }
@@ -52,7 +48,7 @@ public class SearchController extends Controller {
      */
     public CompletionStage<Result> index(Http.Request request) {
         String sessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
-        List<SearchResult> searchResults = searchService.getHistory(sessionId);
+        List<SearchResult> searchResults = searchHistory.getHistory(sessionId);
         return CompletableFuture.completedFuture(
                 ok(views.html.index.render(searchResults, searchForm, request, messagesApi.preferred(request)))
                         .addingToSession(request, SESSION_ID, sessionId));
@@ -68,10 +64,10 @@ public class SearchController extends Controller {
         } else {
             String searchInput = boundForm.get().getInput();
             String sessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
-            return searchService.searchThenAddToHistory(sessionId, searchInput)
-                    .thenApply(rs ->
-                            redirect(routes.SearchController.index())
-                                    .addingToSession(request, SESSION_ID, sessionId));
+            return github.searchRepositories(searchInput, false)
+                    .thenAccept(searchResult -> searchHistory.addToHistory(sessionId, searchResult))
+                    .thenApply(nullResult -> redirect(routes.SearchController.index())
+                            .addingToSession(request, SESSION_ID, sessionId));
         }
     }
 
@@ -97,7 +93,15 @@ public class SearchController extends Controller {
         return github.getRepositoryDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
     }
 
-    
+    /**
+     * 
+     * Controller Method for api : /issueStatistics
+     * @author Meet Mehta
+     * @param user username of github repository
+     * @param repo repository name
+     * @param request Http.Request 
+     * @return page displaying word count of issues title in descending order. 
+     */
     public CompletionStage<Result> issueStatistics(String user, String repo,Http.Request request){
     	CompletionStage<Result> result = issueService.getIssueStatistics(user, repo).thenApplyAsync(
     			op -> ok(views.html.issuesStatistics.render(op, request)));
