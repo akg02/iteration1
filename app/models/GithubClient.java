@@ -61,12 +61,14 @@ public class GithubClient {
 		WSRequest request = client.url(baseURL + "/repos/" + authorName + "/" + repositoryName + "/issues");
 		ObjectMapper objectMapper = new ObjectMapper();
 
-		return request.addHeader("Accept", "application/vnd.github.v3+json").get().thenApply(r -> {
+		return request.addHeader("Authorization", token)
+				.addHeader("Accept", "application/vnd.github.v3+json").get().thenApply(r -> {
 			List<Issue> issues = null;
 			try {
+				
 				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 				issues = objectMapper.readValue(r.asJson().toPrettyString(), new TypeReference<List<Issue>>() {
-
+				
 				});
 
 			} catch (Exception e) {
