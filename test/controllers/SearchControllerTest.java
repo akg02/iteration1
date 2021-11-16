@@ -170,8 +170,20 @@ public class SearchControllerTest extends WithApplication {
     	assertTrue(html.contains("<li>this : 1</li>"));
     	assertTrue(html.contains("<li>for : 1</li>"));
     	assertTrue(html.contains("<li>project : 1</li>"));
+    }
 
-
-    	
+    /**
+     *
+     * @author Smit Parmar
+     */
+    @Test
+    public void testCommitStatistics() {
+        Http.RequestBuilder request = new Http.RequestBuilder().method(Helpers.GET)
+                .uri("/commits/smituparmar/MedicoGraph");
+        Result result = Helpers.route(app, request);
+        assertEquals(Http.Status.OK, result.status());
+        String html = Helpers.contentAsString(result);
+        assertTrue(html.contains("<a href=\"/profile/smituparmar\">smituparmar</a>"));
+        assertTrue(html.contains("<li>Count: 19</li>"));
     }
 }

@@ -4,7 +4,7 @@
 @main("Commit Details") {
 <ol>
 @for((key, value) <- commits.get(0)){
-<li><a href="/profile/@key">@key</a></li>
+<li><a href="/profile/@key">@key</a>
     <ul>
         <li>Count: @commits.get(0).get(key)</li>
         <li>MaxAddition: @commits.get(1).get(key)</li>
@@ -14,6 +14,7 @@
         <li>Min Deletion: @commits.get(5).get(key)</li>
         <li>Average Deletion: @(commits.get(6).get(key)/commits.get(0).get(key))</li>
     </ul>
+</li>
 }
 </ol>
 }

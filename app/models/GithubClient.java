@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Hop Nguyen
@@ -85,23 +86,26 @@ public class GithubClient {
      * @param userName github username of owner of repository
      * @param repoName repository name
      * @return Arraylist containing at most 100 latest commits' ID.
+     *
+     * @author Smit Parmar
      */
-    public CompletableFuture<ArrayList<String>> getAllCommitList(String userName, String repoName){
+    public ArrayList<String> getAllCommitList(String userName, String repoName, int perPage) throws ExecutionException, InterruptedException {
         WSRequest request = client.url(baseURL + "/repos/"+userName+"/" +
                 repoName+"/commits");
         return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .addHeader("Authorization", token)
-                .addQueryParameter("per_page", "100")
+                .addQueryParameter("per_page",  new Integer(perPage).toString())
                 .get()
                 .thenApplyAsync( r -> {
                     ArrayList<String> commitIDList = new ArrayList<>();
                    int f = 0;
                    while(r.asJson().get(f)!=null){
+                       System.out.println(r.asJson().get(f).get("sha").asText());
                        commitIDList.add(r.asJson().get(f).get("sha").asText());
                        f++;
                    }
                     return commitIDList;
-                }).toCompletableFuture();
+                }).toCompletableFuture().get();
     }
 
     /**
@@ -110,6 +114,8 @@ public class GithubClient {
      * @param repoName repository name
      * @param commitID ID of commit
      * @return CommitStats object
+     *
+     * @author Smit Parmar
      */
     public CompletableFuture<CommitStats> getCommitStatByID(String userName, String repoName, String commitID){
         WSRequest request = client.url(baseURL + "/repos/"+userName+"/" +
@@ -117,7 +123,6 @@ public class GithubClient {
 
         return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .addHeader("Authorization", token)
-                .addQueryParameter("per_page", "5")
                 .get()
                 .thenApplyAsync( r-> {
                    CommitStats commitStats;
@@ -153,11 +158,19 @@ public class GithubClient {
      * @param repo repository name
      * @param list contains all Commit IDs.
      * @return List of CommitStat Objet
+     *
+     * @author Smit Parmar
      */
-    public ArrayList<CommitStats> getCommitStatFromList(String user, String repo, ArrayList<String> list) throws Exception {
+    public ArrayList<CommitStats> getCommitStatFromList(String user, String repo, ArrayList<String> list)  {
         ArrayList<CommitStats> commitStatList = new ArrayList<>();
         for(String s: list){
-            commitStatList.add(getCommitStatByID(user, repo, s).get());
+            try {
+                commitStatList.add(getCommitStatByID(user, repo, s).get());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         }
         return commitStatList;
     }
