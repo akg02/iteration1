@@ -1,9 +1,8 @@
-@import play.mvc.Http.Request
 @(repoDetails: RepositoryProfile, user: String)
 
 @main("Repository:" + repoDetails) {
 
-<h3 class="h3" style="margin-left: 20px; margin-top:10px;"> Repository Details </h3>
+<h3 class="h5" style="margin-left: 20px; margin-top:10px;"> Repository Details </h3>
 
 <div class="border" style="margin-top:20px;">
     <ul>
@@ -17,9 +16,7 @@
         <hr class="my-1">
         <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Last Updated on : </strong> @repoDetails.updated_at </p></li>
         <hr class="my-1">
-        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Stars :  </strong> @repoDetails.stargazers_count </p></li>
-        <hr class="my-1">
-        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Forks :  </strong> @repoDetails.forks_count </p></li>
+        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Number of Stars :  </strong> @repoDetails.stargazers_count </p></li>
         <hr class="my-1">
 
         @if(repoDetails.topics.isEmpty()) {
@@ -34,40 +31,11 @@
     </ul>
 </div>
 <br>
-<hr class="my-1">
-<br>
-<h5 class="h5"><a href="/commits/@user/@repoDetails.name">Commits</a></h5>
-<br>
 
 <div class="border" style="margin-top:20px;">
-    <h5><a href="/issueStatistics/@user/@repoDetails.name">Issues</a></h5>
-    @if(repoDetails.issues.isEmpty()) {
-    <p style="margin-left: 20px; margin-top:10px;">No Issues </p></li>
-    } else {
-    <ol>
-        @for(issue <- repoDetails.issues) {
-        <li> @issue.title
-            <ul>
-                <li> @issue.number</li>
-                <li> @issue.state </li>
-                <li>
-                    @if(issue.labels.isEmpty()) {
-                     No Labels
-                } else{
-                        @for(label <- issue.labels) {
-                            label, &nbsp;
-                        }
-                    }
-                </li>
-            </ul>
-        </li>
-        }
-    </ol>
-    }
+    <h5><a href="">Issues</a></h5>
+    <p>@repoDetails.issues</p>
+
+
 </div>
-<br>
-<hr class="my-1">
-<br>
-
-
 }
