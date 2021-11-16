@@ -8,6 +8,7 @@ import com.typesafe.config.Config;
 import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
+import services.IssueService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +22,22 @@ import java.util.concurrent.ExecutionException;
  * The GithubClient class, to hold the content for a Github client
  */
 public class GithubClient {
-    /** The WSClient client */
+    /**
+     * The WSClient client
+     */
     private final WSClient client;
-    /** The String baseURL */
+    /**
+     * The String baseURL
+     */
     private final String baseURL;
-    /** The authorization Github token */
+    /**
+     * The authorization Github token
+     */
     private final String token;
 
-    /** The constructor */
+    /**
+     * The constructor
+     */
     @Inject
     public GithubClient(WSClient client, Config config) {
         this.client = client;
@@ -38,7 +47,8 @@ public class GithubClient {
 
     /**
      * The method searRepositories, to search the repositories based on the given query and whether it's a topic
-     * @param query the given query
+     *
+     * @param query   the given query
      * @param isTopic indicates if the query based on the topic
      * @return the search results
      */
@@ -57,6 +67,14 @@ public class GithubClient {
                     return searchResult;
                 });
     }
+    /**
+     * Method to call live GitHub api to fetch issues
+     *
+     * @param authorName     username of github repository
+     * @param repositoryName repository name
+     * @return CompletionStage object of list of issues
+     * @author Meet Mehta
+     */
 
 	public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {
 		WSRequest request = client.url(baseURL + "/repos/" + authorName + "/" + repositoryName + "/issues");
@@ -72,13 +90,23 @@ public class GithubClient {
 				
 				});
 
-			} catch (Exception e) {
-				return null;
-			}
-			return issues;
-		});
-	}
+        return request.addHeader("Accept", "application/vnd.github.v3+json")
+                .addHeader("sort", "created")
+                .addHeader("direction", "desc")
+                .get().thenApply(r -> {
+            List<Issue> issues = null;
+            try {
+                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                issues = objectMapper.readValue(r.asJson().toPrettyString(), new TypeReference<List<Issue>>() {
 
+                });
+
+            } catch (Exception e) {
+                return null;
+            }
+            return issues;
+        });
+    }
 
     /**
      * By using username and repository name, function will make one arraylist of id of latest 100 commits
@@ -96,7 +124,7 @@ public class GithubClient {
                 .addHeader("Authorization", token)
                 .addQueryParameter("per_page",  new Integer(perPage).toString())
                 .get()
-                .thenApplyAsync( r -> {
+                .thenApplyAsync(r -> {
                     ArrayList<String> commitIDList = new ArrayList<>();
                    int f = 0;
                    while(r.asJson().get(f)!=null){
@@ -104,9 +132,11 @@ public class GithubClient {
                        commitIDList.add(r.asJson().get(f).get("sha").asText());
                        f++;
                    }
+
                     return commitIDList;
                 }).toCompletableFuture().get();
     }
+
 
     /**
      * This function will return new CommitStats model object which has username, email, sha, addition and deletion
@@ -120,12 +150,11 @@ public class GithubClient {
     public CompletableFuture<CommitStats> getCommitStatByID(String userName, String repoName, String commitID){
         WSRequest request = client.url(baseURL + "/repos/"+userName+"/" +
                 repoName+"/commits/"+commitID);
-
         return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .addHeader("Authorization", token)
                 .get()
-                .thenApplyAsync( r-> {
-                   CommitStats commitStats;
+                .thenApplyAsync(r -> {
+                    CommitStats commitStats;
                     commitStats = Json.fromJson(r.asJson().get("commit").get("author"), CommitStats.class);
                     commitStats.setName(r.asJson().get("author").get("login").asText());
                     commitStats.setSha(r.asJson().get("sha").asText());
@@ -136,18 +165,38 @@ public class GithubClient {
     }
 
     /**
-     * @author Sagar Sanghani
      * @param user name of the user
      * @param repo name of the repository
      * @return Object of RepositoryProfile
+     * @author Sagar Sanghani
      */
-    public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo) {
+      
+    public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo, List<RepoIssue> issueList) {
         WSRequest request = client.url(baseURL + "/repos/" + user + "/" + repo);
         return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .get()
                 .thenApply(r -> {
                     RepositoryProfile repositoryProfile = Json.fromJson(r.asJson(), RepositoryProfile.class);
+                    repositoryProfile.issues = issueList;
                     return repositoryProfile;
+                });
+    }
+
+    public CompletionStage<List<RepoIssue>> getLatestIssues(String user, String repo){
+        WSRequest request = client.url(baseURL + "/repos/" + user + "/" + repo + "/issues");
+        return request.addHeader("Accept", "application/vnd.github.v3+json")
+                .addHeader("sort", "created")
+                .addHeader("direction", "desc")
+                .addHeader("state", "all")
+                .addQueryParameter("per_page", "20")
+                .get().thenApply(r -> {
+                    List<RepoIssue> issueList = new ArrayList<>();
+                    int i = 0;
+                    while (r.asJson().get(i) != null) {
+                        issueList.add(Json.fromJson(r.asJson().get(i), RepoIssue.class));
+                        i++;
+                    }
+                    return issueList;
                 });
     }
 
@@ -174,5 +223,4 @@ public class GithubClient {
         }
         return commitStatList;
     }
-
 }
