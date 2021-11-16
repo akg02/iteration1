@@ -89,8 +89,8 @@ public class SearchController extends Controller {
      * Route for repository
      */
     public CompletionStage<Result> repository(String user, String repo) {
-        String fullName = user + "/" + repo;
-        return CompletableFuture.completedFuture(ok(views.html.repository.render(fullName)));
+
+        return github.getRepositoryDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
     }
 
     /**

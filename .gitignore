@@ -16,3 +16,4 @@ build-eclipse/
 target/
 project/target
 /logs/application.log
+/bin/

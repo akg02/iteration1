@@ -124,12 +124,29 @@ public class GithubClient {
                 }).toCompletableFuture();
     }
 
+
+    /**
+     * @author Sagar Sanghani
+     * @param user name of the user
+     * @param repo name of the repository
+     * @return Object of RepositoryProfile
+     */
+    public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo){
+        WSRequest request = client.url(baseURL + "/repos/" + user + "/" + repo);
+        return request.addHeader("Accept", "application/vnd.github.v3+json")
+                .get()
+                .thenApply(r -> {
+                    RepositoryProfile repositoryProfile = Json.fromJson(r.asJson(), RepositoryProfile.class);
+                    return repositoryProfile;
+                });
+
     public ArrayList<CommitStats> getCommitStatFromList(String user, String repo, ArrayList<String> list) throws Exception {
         ArrayList<CommitStats> commitStatList = new ArrayList<>();
         for(String s: list){
             commitStatList.add(getCommitStatByID(user, repo, s).get());
         }
         return commitStatList;
+
     }
 
 }
