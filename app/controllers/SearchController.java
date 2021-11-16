@@ -12,6 +12,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import services.CommitService;
 import services.IssueService;
+import services.RepositoryProfileService;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +33,7 @@ public class SearchController extends Controller {
     private final IssueService issueService;
 
     private final CommitService commitService;
+    private final RepositoryProfileService repositoryProfileService;
     
 
     @Inject
@@ -42,6 +44,7 @@ public class SearchController extends Controller {
         this.searchHistory = new SearchHistory();
         this.issueService  = new IssueService(github);
         this.commitService = new CommitService(github);
+        this.repositoryProfileService = new RepositoryProfileService(github);
     }
 
     /**
@@ -89,9 +92,9 @@ public class SearchController extends Controller {
     /**
      * Route for repository
      */
-    public CompletionStage<Result> repository(String user, String repo) {
-
-        return github.getRepositoryDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
+    public CompletionStage<Result> repository(String user, String repo) throws Exception {
+        CompletionStage<Result> result = repositoryProfileService.getRepoDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
+        return result;
     }
 
     /**
