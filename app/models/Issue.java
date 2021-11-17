@@ -1,6 +1,7 @@
 package models;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -17,7 +18,7 @@ public class Issue implements Serializable {
 	private String title;
 
 	@JsonProperty("labels")
-	private String labels;
+	private List<String> labels;
 
 	@JsonProperty("number")
 	private String number;
@@ -43,20 +44,12 @@ public class Issue implements Serializable {
 	public Issue() {
 		
 	}
-	public Issue(String title, String labels, String number, String state, String body) {
+	public Issue(String title, List<String> labels, String number, String state, String body) {
 		this.title = title;
 		this.labels = labels;
 		this.number = number;
 		this.state = state;
 		this.body = body;
-	}
-
-	public String getLabels() {
-		return labels;
-	}
-
-	public void setLabels(String labels) {
-		this.labels = labels;
 	}
 
 	public String getNumber() {
@@ -81,5 +74,13 @@ public class Issue implements Serializable {
 
 	public void setBody(String body) {
 		this.body = body;
+	}
+
+	public List<String> getLabels() {
+		return labels;
+	}
+
+	public void setLabels(List<String> labels) {
+		this.labels = labels;
 	}
 }
