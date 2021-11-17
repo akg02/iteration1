@@ -148,7 +148,6 @@ public class GithubClient {
     public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo, List<Issue> issueList) {
         WSRequest request = client.url(baseURL + "/repos/" + user + "/" + repo);
         return request.addHeader("Accept", "application/vnd.github.v3+json")
-                .addHeader("Authorization", token)
                 .get()
                 .thenApply(r -> {
                     RepositoryProfile repositoryProfile = Json.fromJson(r.asJson(), RepositoryProfile.class);
