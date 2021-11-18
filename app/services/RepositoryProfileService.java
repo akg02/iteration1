@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -26,10 +27,11 @@ public class RepositoryProfileService {
         this.github = github;
     }
 
-    public CompletionStage<RepositoryProfile> getRepoDetails(String user, String repo) throws Exception {
-        List<Issue> issueList = github.getIssues(user, repo).toCompletableFuture().get();
-        List<Issue> il = issueList.stream().limit(20).collect(Collectors.toList());
-        CompletionStage<RepositoryProfile> repoProfile = github.getRepositoryDetails(user, repo, il);
+    public CompletionStage<RepositoryProfile> getRepoDetails(String user, String repo){
+        CompletionStage<RepositoryProfile> repoProfile = github.getIssues(user, repo)
+                .thenApply(il -> il.stream().limit(20).collect(Collectors.toList()))
+                .thenCompose(il2 -> github.getRepositoryDetails(user, repo, il2));
+
         return repoProfile;
     }
 
