@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
 
 /**
  * @author Sagar Sanghani
@@ -27,7 +28,8 @@ public class RepositoryProfileService {
 
     public CompletionStage<RepositoryProfile> getRepoDetails(String user, String repo) throws Exception {
         List<Issue> issueList = github.getIssues(user, repo).toCompletableFuture().get();
-        CompletionStage<RepositoryProfile> repoProfile = github.getRepositoryDetails(user, repo, issueList);
+        List<Issue> il = issueList.stream().limit(20).collect(Collectors.toList());
+        CompletionStage<RepositoryProfile> repoProfile = github.getRepositoryDetails(user, repo, il);
         return repoProfile;
     }
 
