@@ -51,12 +51,12 @@
                 <li> Issue Number : @issue.getNumber()</li>
                 <li> State : @issue.getState() </li>
                 <li>
-                    @if(issue.getLabels().isEmpty()) {
+                    @if(issue.getLabelNames().isEmpty()) {
                     No Labels
                     } else{
-                    @for(label <- issue.getLabels()) {
-                    label, &nbsp;
-                    }
+                        @for(label <- issue.getLabelNames()) {
+                            @label, &nbsp;
+                        }
                     }
                 </li>
             </ul>
