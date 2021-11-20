@@ -143,14 +143,31 @@ public class SearchControllerTest extends WithApplication {
         assertEquals(Http.Status.OK, result.status());
     }
 
+    /**
+     *  Test case for repository() method
+     *
+     * @author Sagar Sanghani
+     */
+
     @Test
     public void testRepository() {
-        // TODO: Individual task
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(Helpers.GET)
-                .uri("/repository/concordia/android");
+                .uri("/repository/octocat/Hello-World");
         Result result = Helpers.route(app, request);
         assertEquals(Http.Status.OK, result.status());
+        String html = Helpers.contentAsString(result);
+
+        System.out.println(html);
+        assertTrue(html.contains("Repository Details"));
+        assertTrue(html.contains("Hello-World"));
+        assertTrue(html.contains("1710"));
+        assertTrue(html.contains("1643"));
+        assertTrue(html.contains("Issues"));
+        assertTrue(html.contains("Wed Jan 26 14:01:12 EST 2011 "));
+        assertTrue(html.contains("My first repository on GitHub!"));
+        assertTrue(html.contains("I created this issue using Octokit!"));
+        assertTrue(html.contains(" Issue Number : 1943"));
     }
     
     /**
