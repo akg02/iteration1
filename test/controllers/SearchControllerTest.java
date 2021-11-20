@@ -8,6 +8,7 @@ import models.SearchResult;
 
 import org.junit.Test;
 import play.Application;
+import play.cache.AsyncCacheApi;
 import play.inject.Bindings;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.libs.ws.WSClient;
@@ -36,8 +37,8 @@ public class SearchControllerTest extends WithApplication {
      */
     public static class FakeGithubClient extends GithubClient {
         @Inject
-        public FakeGithubClient(WSClient client, Config config) {
-            super(client, config);
+        public FakeGithubClient(WSClient client, AsyncCacheApi cache, Config config) {
+            super(client, cache, config);
         }
 
         @Override
