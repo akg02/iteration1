@@ -86,6 +86,10 @@ public class Issue implements Serializable {
 		this.labels = labels;
 	}
 
+	/**
+	 * A method to extract list of lable names of the issues from the label attribute of issue
+	 * @return list of label names
+	 */
 	public List<String> getLabelNames(){
 		List<String> labelNames = new ArrayList<>();
 
