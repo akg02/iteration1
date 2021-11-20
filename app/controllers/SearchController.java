@@ -113,7 +113,7 @@ public class SearchController extends Controller {
     }
 
     /**
-     * Controller Method for api : /repository/:user/:repo
+     * Controller Method for api : /repository/:user/:repo </br>
      * This page displays repository details and latest 20 issues of the repository
      * @author Sagar Sanghani
      * @param user username of github repository
