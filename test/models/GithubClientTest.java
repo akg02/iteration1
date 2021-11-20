@@ -522,30 +522,30 @@ public class GithubClientTest {
         List<Issue> issueList = new ArrayList<>();
 
 
-        when(client.url("https://api.github.com/repos/octocat/Hello-World")).thenReturn(request);
+        when(client.url("https://api.github.com/repos/Sagar7421/dinosaur-name-generation-rnn")).thenReturn(request);
         when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
         when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
         String responseString = "{ " +
-                " \"name\": \"Hello-World\"," +
-                " \"description\": \"My first repository on GitHub!\","+
-                " \"created_at\": \"2011-01-26T19:01:12Z\"," +
-                " \"updated_at\": \"2021-11-17T23:15:01Z\"," +
-                " \"stargazers_count\":" + 1710 + "," +
-                " \"forks_count\":" + 1643 + "," +
-                " \"topics\": [ ] }";
+                " \"name\": \"dinosaur-name-generation-rnn\"," +
+                " \"description\": \"A dinosaur name generation using RNN in NumPy.\","+
+                " \"created_at\": \"2020-10-17T10:10:38Z\"," +
+                " \"updated_at\": \"2021-11-20T16:52:33Z\"," +
+                " \"stargazers_count\":" + 1 + "," +
+                " \"forks_count\":" + 0 + "," +
+                " \"topics\": [\"neural-network\"] }";
 
         when(response.asJson()).thenReturn(Json.parse(responseString));
         GithubClient github = new GithubClient(client, ConfigFactory.load());
-        CompletionStage<RepositoryProfile> future = github.getRepositoryDetails("octocat", "Hello-World", issueList);
+        CompletionStage<RepositoryProfile> future = github.getRepositoryDetails("Sagar7421", "dinosaur-name-generation-rnn", issueList);
         RepositoryProfile repositoryProfile = future.toCompletableFuture().get();
-        assertEquals("Hello-World", repositoryProfile.name);
-        assertEquals("My first repository on GitHub!", repositoryProfile.description);
-        assertEquals("Wed Jan 26 14:01:12 EST 2011", repositoryProfile.created_at.toString());
-        assertEquals("Wed Nov 17 18:15:01 EST 2021", repositoryProfile.updated_at.toString());
-        assertEquals(1710, repositoryProfile.stargazers_count);
-        assertEquals(1643, repositoryProfile.forks_count);
+        assertEquals("dinosaur-name-generation-rnn", repositoryProfile.name);
+        assertEquals("A dinosaur name generation using RNN in NumPy.", repositoryProfile.description);
+        assertEquals("Sat Oct 17 06:10:38 EDT 2020", repositoryProfile.created_at.toString());
+        assertEquals("Sat Nov 20 11:52:33 EST 2021", repositoryProfile.updated_at.toString());
+        assertEquals(1, repositoryProfile.stargazers_count);
+        assertEquals(0, repositoryProfile.forks_count);
         assertEquals(0, repositoryProfile.issues.size());
-        assertEquals(0, repositoryProfile.topics.size());
+        assertEquals("neural-network", repositoryProfile.topics.get(0));
         Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
     }
 
