@@ -140,12 +140,12 @@ public class GithubClient {
     }
 
     /**
-     * This method returns a completionStage object of type RepositoryProfile model. Fetches the repository details from the github api for the given username and repository names.
+     * This method getRepositoryDetails, fetches the repository details like repository name, description, topics, etc. from the GitHub api for the given username and repository names.
      * @author Sagar Sanghani
      * @param user name of the user
      * @param repo name of the repository
      * @param issueList list of issues of the repository
-     * @return Object of RepositoryProfile
+     * @return CompletionStage Object of type RepositoryProfile
      */
     public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo, List<Issue> issueList) {
         WSRequest request = client.url(baseURL + "/repos/" + user + "/" + repo);
@@ -153,7 +153,7 @@ public class GithubClient {
                 .get()
                 .thenApply(r -> {
                     RepositoryProfile repositoryProfile = Json.fromJson(r.asJson(), RepositoryProfile.class);
-                    repositoryProfile.issues = issueList;
+                    repositoryProfile.setIssues(issueList);
                     return repositoryProfile;
                 });
     }

@@ -511,7 +511,7 @@ public class GithubClientTest {
 
 
     /**
-     * test for getRepositoryDetailss
+     * test case for getRepositoryDetails
      * @author Sagar Sanghani
      */
     @Test
@@ -538,14 +538,14 @@ public class GithubClientTest {
         GithubClient github = new GithubClient(client, ConfigFactory.load());
         CompletionStage<RepositoryProfile> future = github.getRepositoryDetails("Sagar7421", "dinosaur-name-generation-rnn", issueList);
         RepositoryProfile repositoryProfile = future.toCompletableFuture().get();
-        assertEquals("dinosaur-name-generation-rnn", repositoryProfile.name);
-        assertEquals("A dinosaur name generation using RNN in NumPy.", repositoryProfile.description);
-        assertEquals("Sat Oct 17 06:10:38 EDT 2020", repositoryProfile.created_at.toString());
-        assertEquals("Sat Nov 20 11:52:33 EST 2021", repositoryProfile.updated_at.toString());
-        assertEquals(1, repositoryProfile.stargazers_count);
-        assertEquals(0, repositoryProfile.forks_count);
-        assertEquals(0, repositoryProfile.issues.size());
-        assertEquals("neural-network", repositoryProfile.topics.get(0));
+        assertEquals("dinosaur-name-generation-rnn", repositoryProfile.getName());
+        assertEquals("A dinosaur name generation using RNN in NumPy.", repositoryProfile.getDescription());
+        assertEquals("Sat Oct 17 06:10:38 EDT 2020", repositoryProfile.getCreated_at().toString());
+        assertEquals("Sat Nov 20 11:52:33 EST 2021", repositoryProfile.getUpdated_at().toString());
+        assertEquals(1, repositoryProfile.getStargazers_count());
+        assertEquals(0, repositoryProfile.getForks_count());
+        assertEquals(0, repositoryProfile.getIssues().size());
+        assertEquals("neural-network", repositoryProfile.getTopics().get(0));
         Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
     }
 

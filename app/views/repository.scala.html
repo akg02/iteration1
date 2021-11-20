@@ -6,45 +6,44 @@
 
 <div class="border" style="margin-top:20px;">
     <ul>
-        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Name : </strong> @repoDetails.name </p></li>
+        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Name : </strong> @repoDetails.getName() </p></li>
         <hr class="my-1">
         <li><p style="margin-left: 20px; margin-top:10px;"> <strong> User : </strong><a href="/profile/@user">@user</a> </p></li>
         <hr class="my-1">
-        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Description : </strong> @repoDetails.description </p></li>
+        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Description : </strong> @repoDetails.getDescription() </p></li>
         <hr class="my-1">
-        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Created At : </strong> @repoDetails.created_at </p></li>
+        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Created At : </strong> @repoDetails.getCreated_at() </p></li>
         <hr class="my-1">
-        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Last Updated on : </strong> @repoDetails.updated_at </p></li>
+        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Last Updated on : </strong> @repoDetails.getUpdated_at() </p></li>
         <hr class="my-1">
-        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Stars : </strong> @repoDetails.stargazers_count </p></li>
+        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Stars : </strong> @repoDetails.getStargazers_count() </p></li>
         <hr class="my-1">
-        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Forks : </strong> @repoDetails.forks_count </p></li>
+        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Forks : </strong> @repoDetails.getForks_count() </p></li>
         <hr class="my-1">
 
-        @if(repoDetails.topics.isEmpty()) {
+        @if(repoDetails.getTopics().isEmpty()) {
         <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Topics :  </strong> No Topics </p></li>
         } else {
         <li><p style="margin-left: 20px; margin-top:10px;"> <strong> Topics :  </strong>
-            @for(topic <- repoDetails.topics) {
+            @for(topic <- repoDetails.getTopics()) {
             <a href="/topic/@topic" class="badge badge-secondary">@topic</a> &nbsp;
             }
         </p> </li>
         }
+        <hr class="my-1">
+        <li><p style="margin-left: 20px; margin-top:10px;"> <strong> <a href="/commits/@user/@repoDetails.getName()">Commits</a> </strong> </p></li>
     </ul>
 </div>
-<br>
-<hr class="my-1">
-<br>
-<h5 class="h5"><a href="/commits/@user/@repoDetails.name">Commits</a></h5>
+
 <br>
 
 <div class="border" style="margin-top:20px;">
-    <h5><a href="/issueStatistics/@user/@repoDetails.name">Issues</a></h5>
-    @if(repoDetails.issues.isEmpty()) {
+    <h5><a href="/issueStatistics/@user/@repoDetails.getName()">Issues</a></h5>
+    @if(repoDetails.getIssues().isEmpty()) {
     <p style="margin-left: 20px; margin-top:10px;">No Issues </p></li>
     } else {
     <ol>
-        @for(issue <- repoDetails.issues) {
+        @for(issue <- repoDetails.getIssues()) {
         <li> @issue.getTitle()
             <ul>
                 <li> @issue.getBody() </li>
