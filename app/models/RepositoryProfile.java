@@ -23,6 +23,7 @@ public class RepositoryProfile {
     public RepositoryProfile(){
     }
 
+
     public RepositoryProfile(String name, String description, Date created_at, Date updated_at, int stargazers_count, List<Issue> issues, List<String> topics, int forks_count){
         this.name = name;
         this.description = description;

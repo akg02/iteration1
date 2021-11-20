@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import models.GithubClient;
 import models.SearchHistory;
 import models.SearchResult;
+import play.cache.AsyncCacheApi;
 import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
@@ -13,6 +14,7 @@ import play.mvc.Result;
 import services.CommitService;
 import services.IssueService;
 import services.RepositoryProfileService;
+import views.html.repository;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,10 +36,12 @@ public class SearchController extends Controller {
 
     private final CommitService commitService;
     private final RepositoryProfileService repositoryProfileService;
+
+    private AsyncCacheApi cache;
     
 
     @Inject
-    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi) {
+    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi) {
         this.github = github;
         this.searchForm = formFactory.form(SearchForm.class);
         this.messagesApi = messagesApi;
@@ -45,6 +49,7 @@ public class SearchController extends Controller {
         this.issueService  = new IssueService(github);
         this.commitService = new CommitService(github);
         this.repositoryProfileService = new RepositoryProfileService(github);
+        this.cache = asyncCacheApi;
     }
 
     /**
@@ -93,8 +98,11 @@ public class SearchController extends Controller {
      * Route for repository
      */
     public CompletionStage<Result> repository(String user, String repo) throws Exception {
-        CompletionStage<Result> result = repositoryProfileService.getRepoDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
-        return result;
+
+        CompletionStage<Result> cache = this.cache.getOrElseUpdate("repository." + user + "." + repo, () -> repositoryProfileService.getRepoDetails(user, repo).thenApply(rd -> ok(repository.render(rd, user))));
+
+//        CompletionStage<Result> result = repositoryProfileService.getRepoDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
+        return cache;
     }
 
     /**
