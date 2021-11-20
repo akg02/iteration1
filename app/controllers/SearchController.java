@@ -100,13 +100,16 @@ public class SearchController extends Controller {
     }
 
     /**
-     * Route for repository
+     * Controller Method for api : /repository/:user/:repo
+     * This page displays repository details and latest 20 issues of the repository
+     * @author Sagar Sanghani
+     * @param user username of github repository
+     * @param repo repository name
+     * @return Returns repository page
      */
-    public CompletionStage<Result> repository(String user, String repo) throws Exception {
-
+    public CompletionStage<Result> repository(String user, String repo){
         CompletionStage<Result> cache = this.cache.getOrElseUpdate("repository." + user + "." + repo, () -> repositoryProfileService.getRepoDetails(user, repo).thenApply(rd -> ok(repository.render(rd, user))));
-
-//        CompletionStage<Result> result = repositoryProfileService.getRepoDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
+//      CompletionStage<Result> result = repositoryProfileService.getRepoDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
         return cache;
     }
 
