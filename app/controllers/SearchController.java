@@ -16,6 +16,7 @@ import services.CommitService;
 import services.IssueService;
 import services.RepositoryProfileService;
 import views.html.repository;
+import services.ProfileInfoService;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +38,7 @@ public class SearchController extends Controller {
 
     private final CommitService commitService;
     private final RepositoryProfileService repositoryProfileService;
+    private final ProfileInfoService profileInfoService;
 
     private AsyncCacheApi cache;
     
@@ -54,6 +56,8 @@ public class SearchController extends Controller {
         this.commitService = new CommitService(github);
         this.repositoryProfileService = new RepositoryProfileService(github);
         this.cache = asyncCacheApi;
+        this.profileInfoService = new ProfileInfoService(github);
+
     }
 
     /**
@@ -94,11 +98,18 @@ public class SearchController extends Controller {
         return github.searchRepositories(topic, true).thenApplyAsync(rs -> ok(views.html.topic.render(rs)));
     }
 
-    /**
-     * Route for profile
-     */
+   /**
+    * Controller Method for api: /profile/:user
+    * displays details of the users public profile page and hyperlinks to repositories
+    * @author Joon Seung Hwang
+    * @param user username of github
+    * @return user profile page
+    */
     public CompletionStage<Result> profile(String user) {
-        return CompletableFuture.completedFuture(ok(views.html.profile.render(user)));
+        CompletionStage<Result> cache = this.cache
+        		.getOrElseUpdate("repository." + user, () -> profileInfoService.getRepoList(user)
+        				.thenApply(r -> ok(views.html.profile.render(r))));
+        return cache;        
     }
 
     /**

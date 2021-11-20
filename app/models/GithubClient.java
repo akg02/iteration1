@@ -185,5 +185,53 @@ public class GithubClient {
         }
         return commitStatList;
     }
+    
+    /**
+     * Uses username to fetch public information from the github user
+     * and save this information into a ProfileInfo class in addition to the list of repositories
+     * 
+     * @author Joon Seung Hwang
+     * @param user github username
+     * @param repoList list of repositories owned by the user
+     * @return ProfileInfo object containing details of the user and list of repositories 
+     */
+    public CompletionStage<ProfileInfo> displayUserProfile(String user, List<String> repoList){
+    	WSRequest request = client.url(baseURL + "/users/" + user);
+    	return request.addHeader("Accept", "application/vnd.github.v3+json")
+                .addHeader("Authorization", token)
+    			.get()
+    			.thenApply(r -> {
+    				ProfileInfo profileInfo = Json.fromJson(r.asJson(), ProfileInfo.class);
+    				profileInfo.repos = repoList;
+    				
+    				return profileInfo;
+    			});
+    	
+    }
+    
+    /**
+     * Username is used to return an arraylist of repositories owned by the user
+     * 
+     * @author Joon Seung Hwang
+     * @param user github username
+     * @return ArrayList containing list of user's repositories
+     */
+    public CompletionStage<List<String>> getAllRepoList(String user) {
+    	WSRequest request = client.url(baseURL + "/users/" + user + "/repos");
+        return request
+                .addHeader("Authorization", token)
+                .addHeader("Accept", "application/vnd.github.v3+json")
+                .get()
+                .thenApply(r -> {
+                        List<String> repoList = new ArrayList<>();
+                        String name = "name";
+                        int f = 0;
+                        while (r.asJson().get(f) != null) {
+                            repoList.add(r.asJson().get(f).get(name).asText());
+                            f++;
+                        }
+                        return repoList;
+                });
+    }
 
 }
