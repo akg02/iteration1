@@ -5,10 +5,10 @@ package models;
  * @author Smit Parmar
  */
 public class Commits {
-    String userName;
-    int addition;
-    int deletion;
-    int count;
+    private String userName;
+    private int addition;
+    private int deletion;
+    private int count;
 
     /**
      * This is parametrised constructor

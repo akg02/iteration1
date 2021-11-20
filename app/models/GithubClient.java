@@ -104,7 +104,6 @@ public class GithubClient {
                     ArrayList<String> commitIDList = new ArrayList<>();
                    int f = 0;
                    while(r.asJson().get(f)!=null){
-                       System.out.println(r.asJson().get(f).get("sha").asText());
                        commitIDList.add(r.asJson().get(f).get("sha").asText());
                        f++;
                    }
