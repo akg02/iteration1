@@ -1,6 +1,6 @@
 @import play.mvc.Http.Request
 @(search: SearchResult)
 
-@main("Topic: " + search.input) {
+@main("Topic: " + search.getInput()) {
     @listRepositories("Topic", search)
 }

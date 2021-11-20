@@ -19,8 +19,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * Class GithubClientTest
+ * @author Hop Nguyen
+ */
 public class GithubClientTest {
 
+    /**
+     * This is to test the repositories search
+     * @author Hop Nguyen
+     */
     @Test
     public void testSearchRepositories() throws Exception {
         WSClient client = mock(WSClient.class);
@@ -51,17 +59,21 @@ public class GithubClientTest {
         GithubClient github = new GithubClient(client, ConfigFactory.load());
         CompletionStage<SearchResult> future = github.searchRepositories("reactive", false);
         SearchResult searchResult = future.toCompletableFuture().get();
-        assertEquals("reactive", searchResult.input);
-        assertEquals(1, searchResult.repositories.size());
-        assertEquals("ReactiveX", searchResult.repositories.get(0).user);
-        assertEquals("RxJava", searchResult.repositories.get(0).name);
-        assertEquals(Arrays.asList("flow", "java"), searchResult.repositories.get(0).topics);
+        assertEquals("reactive", searchResult.getInput());
+        assertEquals(1, searchResult.getRepositories().size());
+        assertEquals("ReactiveX", searchResult.getRepositories().get(0).getUser());
+        assertEquals("RxJava", searchResult.getRepositories().get(0).getName());
+        assertEquals(Arrays.asList("flow", "java"), searchResult.getRepositories().get(0).getTopics());
         Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
         Mockito.verify(request).addQueryParameter("q", "reactive");
         Mockito.verify(request).addQueryParameter("per_page", "10");
         Mockito.verify(request).addQueryParameter("sort", "updated");
     }
 
+    /**
+     * This is to test the search for topics
+     * @author Hop Nguyen
+     */
     @Test
     public void testSearchTopic() throws Exception {
         WSClient client = mock(WSClient.class);
@@ -92,11 +104,11 @@ public class GithubClientTest {
         GithubClient github = new GithubClient(client, ConfigFactory.load());
         CompletionStage<SearchResult> future = github.searchRepositories("reactive", true);
         SearchResult searchResult = future.toCompletableFuture().get();
-        assertEquals("reactive", searchResult.input);
-        assertEquals(1, searchResult.repositories.size());
-        assertEquals("ReactiveX", searchResult.repositories.get(0).user);
-        assertEquals("RxJava", searchResult.repositories.get(0).name);
-        assertEquals(Arrays.asList("flow", "java"), searchResult.repositories.get(0).topics);
+        assertEquals("reactive", searchResult.getInput());
+        assertEquals(1, searchResult.getRepositories().size());
+        assertEquals("ReactiveX", searchResult.getRepositories().get(0).getUser());
+        assertEquals("RxJava", searchResult.getRepositories().get(0).getName());
+        assertEquals(Arrays.asList("flow", "java"), searchResult.getRepositories().get(0).getTopics());
         Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
         Mockito.verify(request).addQueryParameter("q", "topic:reactive");
         Mockito.verify(request).addQueryParameter("per_page", "10");

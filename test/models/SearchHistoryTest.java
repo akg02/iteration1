@@ -9,8 +9,15 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * The class SearchHistoryTest
+ * @author Hop Nguyen
+ */
 public class SearchHistoryTest {
-
+    /**
+     * This is to test the history of the search
+     * @author Hop Nguyen
+     */
     @Test
     public void testHistory() {
         SearchHistory searchHistory = new SearchHistory();
