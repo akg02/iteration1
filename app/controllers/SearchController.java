@@ -96,16 +96,18 @@ public class SearchController extends Controller {
         return github.searchRepositories(topic, true).thenApply(rs -> ok(views.html.topic.render(rs)));
     }
 
-    /**
-     * Route for profile
-     */
+   /**
+    * Controller Method for api: /profile/:user
+    * displays details of the users public profile page and hyperlinks to repositories
+    * @author Joon Seung Hwang
+    * @param user username of github
+    * @return user profile page
+    */
     public CompletionStage<Result> profile(String user) {
         CompletionStage<Result> cache = this.cache
         		.getOrElseUpdate("repository." + user, () -> profileInfoService.getRepoList(user)
         				.thenApply(r -> ok(views.html.profile.render(r))));
-        return cache;
-    	//return github.displayUserProfile(user, repoList).thenApply(r -> ok(views.html.profile.render(r)));
-        
+        return cache;        
     }
 
     /**

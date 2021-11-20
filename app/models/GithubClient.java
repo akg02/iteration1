@@ -183,11 +183,13 @@ public class GithubClient {
     }
     
     /**
-     * Displays user profile information
+     * Uses username to fetch public information from the github user
+     * and save this information into a ProfileInfo class in addition to the list of repositories
      * 
      * @author Joon Seung Hwang
-     * @param user name of the user
-     * @return object of ProfileInfo
+     * @param user github username
+     * @param repoList list of repositories owned by the user
+     * @return ProfileInfo object containing details of the user and list of repositories 
      */
     public CompletionStage<ProfileInfo> displayUserProfile(String user, List<String> repoList){
     	WSRequest request = client.url(baseURL + "/users/" + user);
@@ -204,33 +206,12 @@ public class GithubClient {
     }
     
     /**
-     * 
-     * to be filled out
-     * 
-     * Gathers the list of repositories of a user
-     * that would be added to the user profile
+     * Username is used to return an arraylist of repositories owned by the user
      * 
      * @author Joon Seung Hwang
-   
+     * @param user github username
+     * @return ArrayList containing list of user's repositories
      */
-//    public CompletableFuture<ArrayList<String>> getAllRepoList(String user){
-//    	WSRequest request = client.url(baseURL + "/users/" + user + "/repos");
-//    	return request.addHeader("Accept", "application/vnd.github.v3+json")
-//    			.get()
-//    			.thenApply(r -> {
-//    				ArrayList<String> repoList = new ArrayList<>();
-//    				 int f = 0;
-//                     while(r.asJson().get(f)!=null){
-//                    	 repoList.add(r.asJson().get(f).get("name").asText());
-//                    	 f++;
-//                     }
-//    				return repoList;
-//    				
-//    			}).toCompletableFuture();
-//    	
-//    }
-//    
-   
     public CompletionStage<List<String>> getAllRepoList(String user) {
     	WSRequest request = client.url(baseURL + "/users/" + user + "/repos");
         return request
@@ -238,17 +219,14 @@ public class GithubClient {
                 .addHeader("Accept", "application/vnd.github.v3+json")
                 .get()
                 .thenApply(r -> {
-                        List<String> issueList = new ArrayList<>();
+                        List<String> repoList = new ArrayList<>();
                         String name = "name";
                         int f = 0;
                         while (r.asJson().get(f) != null) {
-                            issueList.add(r.asJson().get(f).get(name).asText());
+                            repoList.add(r.asJson().get(f).get(name).asText());
                             f++;
                         }
-                        return issueList;
-//                    SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
-//                    searchResult.input = user;
-//                    return searchResult.repositories;
+                        return repoList;
                 });
     }
 

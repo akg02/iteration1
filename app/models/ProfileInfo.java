@@ -3,10 +3,9 @@ package models;
 import java.util.List;
 
 /**
- * 
+ * Class to save profile information of a github user  
  * @author Joon Seung Hwang
- * @version 1
- *
+ * 
  */
 public class ProfileInfo {
 	public String login;
@@ -21,10 +20,16 @@ public class ProfileInfo {
 	public int following;
 	public List<String> repos;
 	
+	/**
+	 * Default constructor for json
+	 */
 	public ProfileInfo() {
 		
 	}
 	
+	/**
+	 * Parameterized Constructor 
+	 */
 	public ProfileInfo(String login, String name,	String company, String blog, String location, String email, String bio,
 			String twitter_username, int followers, int following, List<String> repos) {
 		this.login = login;
