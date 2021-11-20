@@ -24,32 +24,12 @@ public class Commits {
         return userName;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     public int getAddition() {
         return addition;
     }
 
-    public void setAddition(int addition) {
-        this.addition = addition;
-    }
-
     public int getDeletion() {
         return deletion;
-    }
-
-    public void setDeletion(int deletion) {
-        this.deletion = deletion;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
     }
 
 }
