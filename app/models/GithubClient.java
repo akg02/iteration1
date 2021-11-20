@@ -139,9 +139,11 @@ public class GithubClient {
     }
 
     /**
+     * This method returns a completionStage object of type RepositoryProfile model. Fetches the repository details from the github api for the given username and repository names.
      * @author Sagar Sanghani
      * @param user name of the user
      * @param repo name of the repository
+     * @param issueList list of issues of the repository
      * @return Object of RepositoryProfile
      */
     public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo, List<Issue> issueList) {

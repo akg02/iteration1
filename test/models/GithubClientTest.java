@@ -8,6 +8,7 @@ import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
 import play.libs.ws.WSResponse;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -118,6 +119,9 @@ public class GithubClientTest {
     	when(client.url("https://api.github.com/repos/meetmehta1198/StudentAttendanceManagement/issues")).thenReturn(request);
         when(request.addHeader(eq("Authorization"), anyString())).thenReturn(request);
         when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
+        when(request.addHeader("sort", "created")).thenReturn(request);
+        when(request.addHeader("direction", "desc")).thenReturn(request);
+        when(request.addHeader("state", "all")).thenReturn(request);
         when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
         String responseString = "[\n"
         		+ "    {\n"
@@ -503,6 +507,46 @@ public class GithubClientTest {
         GithubClient github = new GithubClient(client, ConfigFactory.load());
         List<String> actual = github.getAllCommitList("smituparmar", "MedicoGraph-Frontend", 100);
         assertEquals("f805f9a977f3e79a222ed45e3c2b036db5c34455",actual.get(0));
+    }
+
+
+    /**
+     * test for getRepositoryDetailss
+     * @author Sagar Sanghani
+     */
+    @Test
+    public void testGetRepositoryDetails() throws Exception {
+        WSClient client = mock(WSClient.class);
+        WSRequest request = mock(WSRequest.class);
+        WSResponse response = mock(WSResponse.class);
+        List<Issue> issueList = new ArrayList<>();
+
+
+        when(client.url("https://api.github.com/repos/Sagar7421/dinosaur-name-generation-rnn")).thenReturn(request);
+        when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
+        when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
+        String responseString = "{ " +
+                " \"name\": \"dinosaur-name-generation-rnn\"," +
+                " \"description\": \"A dinosaur name generation using RNN in NumPy.\","+
+                " \"created_at\": \"2020-10-17T10:10:38Z\"," +
+                " \"updated_at\": \"2021-11-20T16:52:33Z\"," +
+                " \"stargazers_count\":" + 1 + "," +
+                " \"forks_count\":" + 0 + "," +
+                " \"topics\": [\"neural-network\"] }";
+
+        when(response.asJson()).thenReturn(Json.parse(responseString));
+        GithubClient github = new GithubClient(client, ConfigFactory.load());
+        CompletionStage<RepositoryProfile> future = github.getRepositoryDetails("Sagar7421", "dinosaur-name-generation-rnn", issueList);
+        RepositoryProfile repositoryProfile = future.toCompletableFuture().get();
+        assertEquals("dinosaur-name-generation-rnn", repositoryProfile.name);
+        assertEquals("A dinosaur name generation using RNN in NumPy.", repositoryProfile.description);
+        assertEquals("Sat Oct 17 06:10:38 EDT 2020", repositoryProfile.created_at.toString());
+        assertEquals("Sat Nov 20 11:52:33 EST 2021", repositoryProfile.updated_at.toString());
+        assertEquals(1, repositoryProfile.stargazers_count);
+        assertEquals(0, repositoryProfile.forks_count);
+        assertEquals(0, repositoryProfile.issues.size());
+        assertEquals("neural-network", repositoryProfile.topics.get(0));
+        Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
     }
 
 }

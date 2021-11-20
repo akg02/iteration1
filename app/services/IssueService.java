@@ -37,7 +37,6 @@ public class IssueService {
 	 */
 	public CompletionStage<Map<String, Integer>> getIssueStatistics(String user, String repo) {
 		CompletionStage<List<Issue>> issues = this.getIssues(user, repo);
-		
 		CompletionStage<List<String>> titles = issues.thenApplyAsync(issue -> issue.stream()
 				.map(s -> s.getTitle().split(" ")).flatMap(Arrays::stream).collect(Collectors.toList()));
 		CompletionStage<Map<String, Integer>> issueStatistics = titles

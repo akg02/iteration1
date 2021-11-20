@@ -1,6 +1,8 @@
 package controllers;
 
 import com.google.inject.Inject;
+
+import akka.Done;
 import models.GithubClient;
 import models.SearchHistory;
 import models.SearchResult;
@@ -19,6 +21,7 @@ import views.html.repository;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import play.cache.*;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -55,6 +58,7 @@ public class SearchController extends Controller {
     /**
      * The homepage which displays the search history of the current session
      */
+    
     public CompletionStage<Result> index(Http.Request request) {
         String sessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
         List<SearchResult> searchResults = searchHistory.getHistory(sessionId);
@@ -66,6 +70,7 @@ public class SearchController extends Controller {
     /**
      * An endpoint that performs a search and adds the result to the history for the current session
      */
+   
     public CompletionStage<Result> search(Http.Request request) {
         Form<SearchForm> boundForm = searchForm.bindFromRequest(request);
         if (boundForm.hasErrors()) {
@@ -73,10 +78,10 @@ public class SearchController extends Controller {
         } else {
             String searchInput = boundForm.get().getInput();
             String sessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
-            return github.searchRepositories(searchInput, false)
+            return this.cache.getOrElseUpdate("search."+searchInput,()->github.searchRepositories(searchInput, false)
                     .thenAccept(searchResult -> searchHistory.addToHistory(sessionId, searchResult))
                     .thenApply(nullResult -> redirect(routes.SearchController.index())
-                            .addingToSession(request, SESSION_ID, sessionId));
+                            .addingToSession(request, SESSION_ID, sessionId)));
         }
     }
 
@@ -95,13 +100,16 @@ public class SearchController extends Controller {
     }
 
     /**
-     * Route for repository
+     * Controller Method for api : /repository/:user/:repo
+     * This page displays repository details and latest 20 issues of the repository
+     * @author Sagar Sanghani
+     * @param user username of github repository
+     * @param repo repository name
+     * @return Returns repository page
      */
-    public CompletionStage<Result> repository(String user, String repo) throws Exception {
-
+    public CompletionStage<Result> repository(String user, String repo){
         CompletionStage<Result> cache = this.cache.getOrElseUpdate("repository." + user + "." + repo, () -> repositoryProfileService.getRepoDetails(user, repo).thenApply(rd -> ok(repository.render(rd, user))));
-
-//        CompletionStage<Result> result = repositoryProfileService.getRepoDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
+//      CompletionStage<Result> result = repositoryProfileService.getRepoDetails(user, repo).thenApply(rd -> ok(views.html.repository.render(rd, user)));
         return cache;
     }
 
@@ -114,9 +122,11 @@ public class SearchController extends Controller {
      * @param request Http.Request 
      * @return page displaying word count of issues title in descending order. 
      */
+  
     public CompletionStage<Result> issueStatistics(String user, String repo,Http.Request request){
-    	CompletionStage<Result> result = issueService.getIssueStatistics(user, repo).thenApplyAsync(
-    			op -> ok(views.html.issuesStatistics.render(op, request)));
+    	CompletionStage<Result> result = this.cache.getOrElseUpdate("issueStat."+user+"."+repo,()->issueService.getIssueStatistics(user, repo).thenApplyAsync(
+    			op -> ok(views.html.issuesStatistics.render(op, request)).withHeader(CACHE_CONTROL, "max-age=3600")));
+    	 
     			
     	return result;
     }
