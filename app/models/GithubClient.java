@@ -16,6 +16,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
 /**
+ * Class GithubClient
  * @author Hop Nguyen
  * @version 1: Hop Nguyen implements the project framework, search, and topic feature.
  * The GithubClient class, to hold the content for a Github client
@@ -28,7 +29,9 @@ public class GithubClient {
     /** The authorization Github token */
     private final String token;
 
-    /** The constructor */
+    /** The constructor
+     * @author Hop Nguyen
+     */
     @Inject
     public GithubClient(WSClient client, Config config) {
         this.client = client;
@@ -38,6 +41,7 @@ public class GithubClient {
 
     /**
      * The method searRepositories, to search the repositories based on the given query and whether it's a topic
+     * @author Hop Nguyen
      * @param query the given query
      * @param isTopic indicates if the query based on the topic
      * @return the search results
@@ -51,9 +55,9 @@ public class GithubClient {
                 .addQueryParameter("sort", "updated")
                 .addQueryParameter("per_page", "10")
                 .get()
-                .thenApply(r -> {
+                .thenApplyAsync(r -> {
                     SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
-                    searchResult.input = query;
+                    searchResult.setInput(query);
                     return searchResult;
                 });
     }
