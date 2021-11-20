@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.typesafe.config.Config;
+import play.cache.AsyncCacheApi;
 import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
@@ -16,6 +17,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
 /**
+ * Class GithubClient
  * @author Hop Nguyen
  * @version 1: Hop Nguyen implements the project framework, search, and topic feature.
  * The GithubClient class, to hold the content for a Github client
@@ -28,34 +30,42 @@ public class GithubClient {
     /** The authorization Github token */
     private final String token;
 
-    /** The constructor */
+    private final AsyncCacheApi cache;
+    /** The constructor
+     * @author Hop Nguyen
+     */
     @Inject
-    public GithubClient(WSClient client, Config config) {
+    public GithubClient(WSClient client, AsyncCacheApi cache, Config config) {
         this.client = client;
+        this.cache = cache;
         this.baseURL = config.getString("github.url");
         this.token = config.getString("github.token");
     }
 
     /**
      * The method searRepositories, to search the repositories based on the given query and whether it's a topic
+     * @author Hop Nguyen
      * @param query the given query
      * @param isTopic indicates if the query based on the topic
      * @return the search results
      */
     public CompletionStage<SearchResult> searchRepositories(String query, boolean isTopic) {
-        WSRequest request = client.url(baseURL + "/search/repositories");
-        return request
-                .addHeader("Authorization", token)
-                .addHeader("Accept", "application/vnd.github.v3+json")
-                .addQueryParameter("q", (isTopic ? "topic:" : "") + query)
-                .addQueryParameter("sort", "updated")
-                .addQueryParameter("per_page", "10")
-                .get()
-                .thenApply(r -> {
-                    SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
-                    searchResult.input = query;
-                    return searchResult;
-                });
+        String githubQuery = (isTopic ? "topic:" : "") + query;
+        return cache.getOrElseUpdate("search://" + githubQuery, () -> {
+            WSRequest request = client.url(baseURL + "/search/repositories");
+            return request
+                    .addHeader("Authorization", token)
+                    .addHeader("Accept", "application/vnd.github.v3+json")
+                    .addQueryParameter("q", githubQuery)
+                    .addQueryParameter("sort", "updated")
+                    .addQueryParameter("per_page", "10")
+                    .get()
+                    .thenApplyAsync(r -> {
+                        SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
+                        searchResult.setInput(query);
+                        return searchResult;
+                    });
+        }, 3600);
     }
 
 	public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {
@@ -139,12 +149,12 @@ public class GithubClient {
     }
 
     /**
-     * This method returns a completionStage object of type RepositoryProfile model. Fetches the repository details from the github api for the given username and repository names.
+     * This method getRepositoryDetails, fetches the repository details like repository name, description, topics, etc. from the GitHub api for the given username and repository names.
      * @author Sagar Sanghani
      * @param user name of the user
      * @param repo name of the repository
      * @param issueList list of issues of the repository
-     * @return Object of RepositoryProfile
+     * @return CompletionStage Object of type RepositoryProfile
      */
     public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo, List<Issue> issueList) {
         WSRequest request = client.url(baseURL + "/repos/" + user + "/" + repo);
@@ -152,7 +162,7 @@ public class GithubClient {
                 .get()
                 .thenApply(r -> {
                     RepositoryProfile repositoryProfile = Json.fromJson(r.asJson(), RepositoryProfile.class);
-                    repositoryProfile.issues = issueList;
+                    repositoryProfile.setIssues(issueList);
                     return repositoryProfile;
                 });
     }
@@ -173,6 +183,54 @@ public class GithubClient {
                 commitStatList.add(getCommitStatByID(user, repo, s).get());
         }
         return commitStatList;
+    }
+    
+    /**
+     * Uses username to fetch public information from the github user
+     * and save this information into a ProfileInfo class in addition to the list of repositories
+     * 
+     * @author Joon Seung Hwang
+     * @param user github username
+     * @param repoList list of repositories owned by the user
+     * @return ProfileInfo object containing details of the user and list of repositories 
+     */
+    public CompletionStage<ProfileInfo> displayUserProfile(String user, List<String> repoList){
+    	WSRequest request = client.url(baseURL + "/users/" + user);
+    	return request.addHeader("Accept", "application/vnd.github.v3+json")
+                .addHeader("Authorization", token)
+    			.get()
+    			.thenApply(r -> {
+    				ProfileInfo profileInfo = Json.fromJson(r.asJson(), ProfileInfo.class);
+    				profileInfo.repos = repoList;
+    				
+    				return profileInfo;
+    			});
+    	
+    }
+    
+    /**
+     * Username is used to return an arraylist of repositories owned by the user
+     * 
+     * @author Joon Seung Hwang
+     * @param user github username
+     * @return ArrayList containing list of user's repositories
+     */
+    public CompletionStage<List<String>> getAllRepoList(String user) {
+    	WSRequest request = client.url(baseURL + "/users/" + user + "/repos");
+        return request
+                .addHeader("Authorization", token)
+                .addHeader("Accept", "application/vnd.github.v3+json")
+                .get()
+                .thenApply(r -> {
+                        List<String> repoList = new ArrayList<>();
+                        String name = "name";
+                        int f = 0;
+                        while (r.asJson().get(f) != null) {
+                            repoList.add(r.asJson().get(f).get(name).asText());
+                            f++;
+                        }
+                        return repoList;
+                });
     }
 
 }

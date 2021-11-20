@@ -3,24 +3,54 @@ package models;
 import com.typesafe.config.ConfigFactory;
 import org.junit.Test;
 import org.mockito.Mockito;
+import play.cache.AsyncCacheApi;
 import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
 import play.libs.ws.WSResponse;
 
-import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
+/**
+ * Class GithubClientTest
+ * @author Hop Nguyen
+ */
 public class GithubClientTest {
 
+    /**
+     * @author Hop Nguyen
+     * @param cachedValue
+     * @return a mocked cache api for testing
+     */
+    private AsyncCacheApi mockCache(Object cachedValue) {
+        AsyncCacheApi cache = mock(AsyncCacheApi.class);
+        when(cache.getOrElseUpdate(anyString(), any())).thenAnswer(params -> {
+            if (cachedValue != null) {
+                return cachedValue;
+            }
+            final Callable<?> provider = params.getArgument(1);
+            return provider.call();
+        });
+        when(cache.getOrElseUpdate(anyString(), any(), anyInt())).thenAnswer(params -> {
+            if (cachedValue != null) {
+                return cachedValue;
+            }
+            final Callable<?> provider = params.getArgument(1);
+            return provider.call();
+        });
+        return cache;
+    }
+    /**
+     * This is to test the repositories search
+     * @author Hop Nguyen
+     */
     @Test
     public void testSearchRepositories() throws Exception {
         WSClient client = mock(WSClient.class);
@@ -48,20 +78,24 @@ public class GithubClientTest {
                 "    }" +
                 "  ]}";
         when(response.asJson()).thenReturn(Json.parse(responseString));
-        GithubClient github = new GithubClient(client, ConfigFactory.load());
+        GithubClient github = new GithubClient(client, mockCache(null), ConfigFactory.load());
         CompletionStage<SearchResult> future = github.searchRepositories("reactive", false);
         SearchResult searchResult = future.toCompletableFuture().get();
-        assertEquals("reactive", searchResult.input);
-        assertEquals(1, searchResult.repositories.size());
-        assertEquals("ReactiveX", searchResult.repositories.get(0).user);
-        assertEquals("RxJava", searchResult.repositories.get(0).name);
-        assertEquals(Arrays.asList("flow", "java"), searchResult.repositories.get(0).topics);
+        assertEquals("reactive", searchResult.getInput());
+        assertEquals(1, searchResult.getRepositories().size());
+        assertEquals("ReactiveX", searchResult.getRepositories().get(0).getUser());
+        assertEquals("RxJava", searchResult.getRepositories().get(0).getName());
+        assertEquals(Arrays.asList("flow", "java"), searchResult.getRepositories().get(0).getTopics());
         Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
         Mockito.verify(request).addQueryParameter("q", "reactive");
         Mockito.verify(request).addQueryParameter("per_page", "10");
         Mockito.verify(request).addQueryParameter("sort", "updated");
     }
 
+    /**
+     * This is to test the search for topics
+     * @author Hop Nguyen
+     */
     @Test
     public void testSearchTopic() throws Exception {
         WSClient client = mock(WSClient.class);
@@ -89,20 +123,37 @@ public class GithubClientTest {
                 "    }" +
                 "  ]}";
         when(response.asJson()).thenReturn(Json.parse(responseString));
-        GithubClient github = new GithubClient(client, ConfigFactory.load());
+        GithubClient github = new GithubClient(client, mockCache(null), ConfigFactory.load());
         CompletionStage<SearchResult> future = github.searchRepositories("reactive", true);
         SearchResult searchResult = future.toCompletableFuture().get();
-        assertEquals("reactive", searchResult.input);
-        assertEquals(1, searchResult.repositories.size());
-        assertEquals("ReactiveX", searchResult.repositories.get(0).user);
-        assertEquals("RxJava", searchResult.repositories.get(0).name);
-        assertEquals(Arrays.asList("flow", "java"), searchResult.repositories.get(0).topics);
+        assertEquals("reactive", searchResult.getInput());
+        assertEquals(1, searchResult.getRepositories().size());
+        assertEquals("ReactiveX", searchResult.getRepositories().get(0).getUser());
+        assertEquals("RxJava", searchResult.getRepositories().get(0).getName());
+        assertEquals(Arrays.asList("flow", "java"), searchResult.getRepositories().get(0).getTopics());
         Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
         Mockito.verify(request).addQueryParameter("q", "topic:reactive");
         Mockito.verify(request).addQueryParameter("per_page", "10");
         Mockito.verify(request).addQueryParameter("sort", "updated");
     }
-    
+
+    /**
+     * Test if the cache return already search result
+     * @author Hop Nguyen
+     */
+    @Test
+    public void testCacheSearchResultFromGithub() {
+        WSClient client = mock(WSClient.class);
+        SearchResult result = new SearchResult();
+        CompletableFuture<SearchResult> mockResult = CompletableFuture.completedFuture(result);
+        AsyncCacheApi cache = mockCache(mockResult);
+        GithubClient github = new GithubClient(client, cache, ConfigFactory.load());
+        CompletionStage<SearchResult> searchByTerm = github.searchRepositories("reactive", false);
+        assertEquals(mockResult, searchByTerm);
+        // Do not access Github
+        verifyNoInteractions(client);
+    }
+
     /**
      * Test case for getIssues() method
      * @author Meet Mehta
@@ -186,7 +237,7 @@ public class GithubClientTest {
         		+ "]";
         
         when(response.asJson()).thenReturn(Json.parse(responseString));
-        GithubClient github = new GithubClient(client, ConfigFactory.load());
+        GithubClient github = new GithubClient(client, mockCache(null), ConfigFactory.load());
         List<Issue> actual = github.getIssues("meetmehta1198", "StudentAttendanceManagement").toCompletableFuture().get();
         assertEquals("Help for running this project ",actual.get(0).getTitle());
 
@@ -323,7 +374,7 @@ public class GithubClientTest {
                 "}";
 
         when(response.asJson()).thenReturn(Json.parse(responseString));
-        GithubClient github = new GithubClient(client, ConfigFactory.load());
+        GithubClient github = new GithubClient(client, mockCache(null), ConfigFactory.load());
         CommitStats actual = github.getCommitStatByID("smituparmar", "MedicoGraph", "4477971350127c4edbca5f8acf439ce96fbca93e").get();
         assertEquals("smituparmar",actual.getName());
         assertEquals(5,actual.getAddition());
@@ -504,14 +555,14 @@ public class GithubClientTest {
                 "]";
 
         when(response.asJson()).thenReturn(Json.parse(responseString));
-        GithubClient github = new GithubClient(client, ConfigFactory.load());
+        GithubClient github = new GithubClient(client, mockCache(null), ConfigFactory.load());
         List<String> actual = github.getAllCommitList("smituparmar", "MedicoGraph-Frontend", 100);
         assertEquals("f805f9a977f3e79a222ed45e3c2b036db5c34455",actual.get(0));
     }
 
 
     /**
-     * test for getRepositoryDetailss
+     * test case for getRepositoryDetails
      * @author Sagar Sanghani
      */
     @Test
@@ -535,17 +586,17 @@ public class GithubClientTest {
                 " \"topics\": [\"neural-network\"] }";
 
         when(response.asJson()).thenReturn(Json.parse(responseString));
-        GithubClient github = new GithubClient(client, ConfigFactory.load());
+        GithubClient github = new GithubClient(client, mockCache(null), ConfigFactory.load());
         CompletionStage<RepositoryProfile> future = github.getRepositoryDetails("Sagar7421", "dinosaur-name-generation-rnn", issueList);
         RepositoryProfile repositoryProfile = future.toCompletableFuture().get();
-        assertEquals("dinosaur-name-generation-rnn", repositoryProfile.name);
-        assertEquals("A dinosaur name generation using RNN in NumPy.", repositoryProfile.description);
-        assertEquals("Sat Oct 17 06:10:38 EDT 2020", repositoryProfile.created_at.toString());
-        assertEquals("Sat Nov 20 11:52:33 EST 2021", repositoryProfile.updated_at.toString());
-        assertEquals(1, repositoryProfile.stargazers_count);
-        assertEquals(0, repositoryProfile.forks_count);
-        assertEquals(0, repositoryProfile.issues.size());
-        assertEquals("neural-network", repositoryProfile.topics.get(0));
+        assertEquals("dinosaur-name-generation-rnn", repositoryProfile.getName());
+        assertEquals("A dinosaur name generation using RNN in NumPy.", repositoryProfile.getDescription());
+        assertEquals("Sat Oct 17 06:10:38 EDT 2020", repositoryProfile.getCreated_at().toString());
+        assertEquals("Sat Nov 20 11:52:33 EST 2021", repositoryProfile.getUpdated_at().toString());
+        assertEquals(1, repositoryProfile.getStargazers_count());
+        assertEquals(0, repositoryProfile.getForks_count());
+        assertEquals(0, repositoryProfile.getIssues().size());
+        assertEquals("neural-network", repositoryProfile.getTopics().get(0));
         Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
     }
 

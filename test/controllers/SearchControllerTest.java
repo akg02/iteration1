@@ -6,9 +6,9 @@ import models.GithubClient;
 import models.Repository;
 import models.SearchResult;
 
-import org.eclipse.jetty.http.HttpStatus;
 import org.junit.Test;
 import play.Application;
+import play.cache.AsyncCacheApi;
 import play.inject.Bindings;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.libs.ws.WSClient;
@@ -26,27 +26,38 @@ import java.util.concurrent.CompletionStage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Class SearchControllerTest
+ * @author Hop Nguyen
+ */
 public class SearchControllerTest extends WithApplication {
-
+    /**
+     * Class FakeGithubClient
+     * @author Hop Nguyen
+     */
     public static class FakeGithubClient extends GithubClient {
         @Inject
-        public FakeGithubClient(WSClient client, Config config) {
-            super(client, config);
+        public FakeGithubClient(WSClient client, AsyncCacheApi cache, Config config) {
+            super(client, cache, config);
         }
 
         @Override
         public CompletionStage<SearchResult> searchRepositories(String query, boolean isTopic) {
             if ((query.equals("java programming") && !isTopic) || (query.equals("android") && isTopic)) {
                 SearchResult result = new SearchResult();
-                result.repositories = Arrays.asList(
+                result.setRepositories(Arrays.asList(
                         new Repository("hope", "java", Arrays.asList("android", "security")),
-                        new Repository("concordia", "android", Collections.emptyList()));
-                result.input = query;
+                        new Repository("concordia", "android", Collections.emptyList())));
+                result.setInput(query);
                 return CompletableFuture.completedFuture(result);
             }
             throw new AssertionError("Unknown query");
         }
     }
+
+    /**
+     * @author Hop Nguyen
+     */
     @Override
     protected Application provideApplication() {
         return new GuiceApplicationBuilder()
@@ -54,6 +65,10 @@ public class SearchControllerTest extends WithApplication {
                 .build();
     }
 
+    /**
+     * This is to test the empty home page
+     * @author Hop Nguyen
+     */
     @Test
     public void testEmptyHomePage() {
         Http.RequestBuilder request = new Http.RequestBuilder()
@@ -67,6 +82,10 @@ public class SearchControllerTest extends WithApplication {
         assertTrue(result.session().get(SearchController.SESSION_ID).isPresent());
     }
 
+    /**
+     * This is to test when doing the search without input
+     * @author Hop Nguyen
+     */
     @Test
     public void testSearchWithoutInput() {
         Http.RequestBuilder searchRequest = new Http.RequestBuilder()
@@ -76,7 +95,10 @@ public class SearchControllerTest extends WithApplication {
         // Without input, we just redirect to the index page
         assertEquals(Http.Status.SEE_OTHER, result.status());
     }
-
+    /**
+     * This is to test the search
+     * @author Hop Nguyen
+     */
     @Test
     public void testSearch() {
         // 1. Create a POST request containing a search query
@@ -114,6 +136,10 @@ public class SearchControllerTest extends WithApplication {
         assertTrue(html.contains("href=\"/topic/security\""));
     }
 
+    /**
+     * This is to test for topics
+     * @author Hop Nguyen
+     */
     @Test
     public void testTopic() {
         Http.RequestBuilder request = new Http.RequestBuilder()
