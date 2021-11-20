@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.typesafe.config.Config;
+import play.cache.AsyncCacheApi;
 import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.libs.ws.WSRequest;
@@ -29,12 +30,14 @@ public class GithubClient {
     /** The authorization Github token */
     private final String token;
 
+    private final AsyncCacheApi cache;
     /** The constructor
      * @author Hop Nguyen
      */
     @Inject
-    public GithubClient(WSClient client, Config config) {
+    public GithubClient(WSClient client, AsyncCacheApi cache, Config config) {
         this.client = client;
+        this.cache = cache;
         this.baseURL = config.getString("github.url");
         this.token = config.getString("github.token");
     }
@@ -47,19 +50,22 @@ public class GithubClient {
      * @return the search results
      */
     public CompletionStage<SearchResult> searchRepositories(String query, boolean isTopic) {
-        WSRequest request = client.url(baseURL + "/search/repositories");
-        return request
-                .addHeader("Authorization", token)
-                .addHeader("Accept", "application/vnd.github.v3+json")
-                .addQueryParameter("q", (isTopic ? "topic:" : "") + query)
-                .addQueryParameter("sort", "updated")
-                .addQueryParameter("per_page", "10")
-                .get()
-                .thenApplyAsync(r -> {
-                    SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
-                    searchResult.setInput(query);
-                    return searchResult;
-                });
+        String githubQuery = (isTopic ? "topic:" : "") + query;
+        return cache.getOrElseUpdate("search://" + githubQuery, () -> {
+            WSRequest request = client.url(baseURL + "/search/repositories");
+            return request
+                    .addHeader("Authorization", token)
+                    .addHeader("Accept", "application/vnd.github.v3+json")
+                    .addQueryParameter("q", githubQuery)
+                    .addQueryParameter("sort", "updated")
+                    .addQueryParameter("per_page", "10")
+                    .get()
+                    .thenApplyAsync(r -> {
+                        SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
+                        searchResult.setInput(query);
+                        return searchResult;
+                    });
+        }, 3600);
     }
 
 	public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {
