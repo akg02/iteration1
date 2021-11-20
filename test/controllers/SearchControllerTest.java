@@ -153,21 +153,22 @@ public class SearchControllerTest extends WithApplication {
     public void testRepository() {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(Helpers.GET)
-                .uri("/repository/octocat/Hello-World");
+                .uri("/repository/Sagar7421/dinosaur-name-generation-rnn");
         Result result = Helpers.route(app, request);
         assertEquals(Http.Status.OK, result.status());
         String html = Helpers.contentAsString(result);
 
-        System.out.println(html);
         assertTrue(html.contains("Repository Details"));
-        assertTrue(html.contains("Hello-World"));
-        assertTrue(html.contains("1710"));
-        assertTrue(html.contains("1643"));
+        assertTrue(html.contains("dinosaur-name-generation-rnn"));
+        assertTrue(html.contains("Sagar7421"));
+        assertTrue(html.contains("1"));
+        assertTrue(html.contains("0"));
         assertTrue(html.contains("Issues"));
-        assertTrue(html.contains("Wed Jan 26 14:01:12 EST 2011 "));
-        assertTrue(html.contains("My first repository on GitHub!"));
-        assertTrue(html.contains("I created this issue using Octokit!"));
-        assertTrue(html.contains(" Issue Number : 1943"));
+        assertTrue(html.contains("Sat Oct 17 06:10:38 EDT 2020 "));
+        assertTrue(html.contains("A dinosaur name generation using RNN in NumPy."));
+        assertTrue(html.contains("This is an open issue. Just for demo stuff."));
+        assertTrue(html.contains("Dinosaurs died long ago. Would love and be equally scared to meet a velociraptor."));
+        assertTrue(html.contains(" Issue Number : 2"));
     }
     
     /**

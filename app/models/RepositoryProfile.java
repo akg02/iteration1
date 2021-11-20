@@ -1,14 +1,13 @@
 package models;
 
-import com.google.inject.Inject;
-
 import java.util.*;
-import java.util.concurrent.CompletionStage;
 
 /**
+ * Model Class to store Repository Details data
  * @author Sagar Sanghani
  * @version 1
  */
+
 public class RepositoryProfile {
     public List<String> topics;
     public String name;
@@ -19,11 +18,15 @@ public class RepositoryProfile {
     public List<Issue> issues;
     public int forks_count;
 
-
+    /**
+     * Default constructor for json
+     */
     public RepositoryProfile(){
     }
 
-
+    /**
+     * This is parameterised Constructor
+     */
     public RepositoryProfile(String name, String description, Date created_at, Date updated_at, int stargazers_count, List<Issue> issues, List<String> topics, int forks_count){
         this.name = name;
         this.description = description;
