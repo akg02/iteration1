@@ -135,8 +135,8 @@ public class SearchController extends Controller {
     public CompletionStage<Result> commits(String user, String repo, Http.Request request)  {
         CompletionStage<Result> resultCompletionStage = null;
         try{
-            resultCompletionStage =  commitService.getCommitStats(user,repo)
-                    .thenApplyAsync(output -> ok(views.html.commits.render(output, request)));
+            resultCompletionStage =  this.cache.getOrElseUpdate("commits." + user + "." + repo,() -> commitService.getCommitStats(user,repo)
+                    .thenApplyAsync(output -> ok(views.html.commits.render(output, request))));
         }
         catch (Exception e){
             e.printStackTrace();
