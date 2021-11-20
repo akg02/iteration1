@@ -45,17 +45,18 @@
     } else {
     <ol>
         @for(issue <- repoDetails.issues) {
-        <li> @issue.title
+        <li> @issue.getTitle()
             <ul>
-                <li> @issue.number</li>
-                <li> @issue.state </li>
+                <li> @issue.getBody() </li>
+                <li> Issue Number : @issue.getNumber()</li>
+                <li> State : @issue.getState() </li>
                 <li>
-                    @if(issue.labels.isEmpty()) {
+                    @if(issue.getLabelNames().isEmpty()) {
                     No Labels
                     } else{
-                    @for(label <- issue.labels) {
-                    label, &nbsp;
-                    }
+                        @for(label <- issue.getLabelNames()) {
+                            @label, &nbsp;
+                        }
                     }
                 </li>
             </ul>

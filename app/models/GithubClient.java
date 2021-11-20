@@ -63,7 +63,11 @@ public class GithubClient {
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		return request.addHeader("Authorization", token)
-				.addHeader("Accept", "application/vnd.github.v3+json").get().thenApply(r -> {
+				.addHeader("Accept", "application/vnd.github.v3+json")
+                .addHeader("sort", "created")
+                .addHeader("direction", "desc")
+                .addHeader("state", "all")
+                .get().thenApply(r -> {
 			List<Issue> issues = null;
 			try {
 				
@@ -141,7 +145,7 @@ public class GithubClient {
      * @param repo name of the repository
      * @return Object of RepositoryProfile
      */
-    public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo, List<RepoIssue> issueList) {
+    public CompletionStage<RepositoryProfile> getRepositoryDetails(String user, String repo, List<Issue> issueList) {
         WSRequest request = client.url(baseURL + "/repos/" + user + "/" + repo);
         return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .get()
@@ -149,24 +153,6 @@ public class GithubClient {
                     RepositoryProfile repositoryProfile = Json.fromJson(r.asJson(), RepositoryProfile.class);
                     repositoryProfile.issues = issueList;
                     return repositoryProfile;
-                });
-    }
-
-    public CompletionStage<List<RepoIssue>> getLatestIssues(String user, String repo){
-        WSRequest request = client.url(baseURL + "/repos/" + user + "/" + repo + "/issues");
-        return request.addHeader("Accept", "application/vnd.github.v3+json")
-                .addHeader("sort", "created")
-                .addHeader("direction", "desc")
-                .addHeader("state", "all")
-                .addQueryParameter("per_page", "20")
-                .get().thenApply(r -> {
-                    List<RepoIssue> issueList = new ArrayList<>();
-                    int i = 0;
-                    while (r.asJson().get(i) != null) {
-                        issueList.add(Json.fromJson(r.asJson().get(i), RepoIssue.class));
-                        i++;
-                    }
-                    return issueList;
                 });
     }
 
