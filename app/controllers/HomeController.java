@@ -28,7 +28,7 @@ import java.util.concurrent.CompletionStage;
  * @author Hop Nguyen
  * @version 1: Hop Nguyen implements the project framework, search, and topic feature.
  */
-public class SearchController extends Controller {
+public class HomeController extends Controller {
     public static final String SESSION_ID = "session_id";
 
     private final GithubClient github;
@@ -44,7 +44,7 @@ public class SearchController extends Controller {
     
 
     @Inject
-    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi) {
+    public HomeController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi) {
         this.github = github;
         this.searchForm = formFactory.form(SearchForm.class);
         this.messagesApi = messagesApi;
@@ -70,18 +70,18 @@ public class SearchController extends Controller {
     /**
      * An endpoint that performs a search and adds the result to the history for the current session
      */
-    @Cached(key="search")
+   
     public CompletionStage<Result> search(Http.Request request) {
         Form<SearchForm> boundForm = searchForm.bindFromRequest(request);
         if (boundForm.hasErrors()) {
-            return CompletableFuture.completedFuture(redirect(routes.SearchController.index()));
+            return CompletableFuture.completedFuture(redirect(routes.HomeController.index()));
         } else {
             String searchInput = boundForm.get().getInput();
             String sessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
-            return github.searchRepositories(searchInput, false)
+            return this.cache.getOrElseUpdate("search."+searchInput,()->github.searchRepositories(searchInput, false)
                     .thenAccept(searchResult -> searchHistory.addToHistory(sessionId, searchResult))
-                    .thenApply(nullResult -> redirect(routes.SearchController.index()).withHeader(CACHE_CONTROL, "max-age=3600")
-                            .addingToSession(request, SESSION_ID, sessionId));
+                    .thenApply(nullResult -> redirect(routes.HomeController.index())
+                            .addingToSession(request, SESSION_ID, sessionId)));
         }
     }
 
