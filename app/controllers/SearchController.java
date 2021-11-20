@@ -119,10 +119,10 @@ public class SearchController extends Controller {
      * @param request Http.Request 
      * @return page displaying word count of issues title in descending order. 
      */
-    @Cached(key="issueStat")
+  
     public CompletionStage<Result> issueStatistics(String user, String repo,Http.Request request){
-    	CompletionStage<Result> result = issueService.getIssueStatistics(user, repo).thenApplyAsync(
-    			op -> ok(views.html.issuesStatistics.render(op, request)).withHeader(CACHE_CONTROL, "max-age=3600"));
+    	CompletionStage<Result> result = this.cache.getOrElseUpdate("issueStat."+user+"."+repo,()->issueService.getIssueStatistics(user, repo).thenApplyAsync(
+    			op -> ok(views.html.issuesStatistics.render(op, request)).withHeader(CACHE_CONTROL, "max-age=3600")));
     	 
     			
     	return result;
