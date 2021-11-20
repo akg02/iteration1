@@ -114,7 +114,6 @@ public class GithubClient {
                     ArrayList<String> commitIDList = new ArrayList<>();
                    int f = 0;
                    while(r.asJson().get(f)!=null){
-                       System.out.println(r.asJson().get(f).get("sha").asText());
                        commitIDList.add(r.asJson().get(f).get("sha").asText());
                        f++;
                    }
@@ -178,16 +177,10 @@ public class GithubClient {
      *
      * @author Smit Parmar
      */
-    public ArrayList<CommitStats> getCommitStatFromList(String user, String repo, ArrayList<String> list)  {
+    public ArrayList<CommitStats> getCommitStatFromList(String user, String repo, ArrayList<String> list) throws Exception  {
         ArrayList<CommitStats> commitStatList = new ArrayList<>();
         for(String s: list){
-            try {
                 commitStatList.add(getCommitStatByID(user, repo, s).get());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
         }
         return commitStatList;
     }

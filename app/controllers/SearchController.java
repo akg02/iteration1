@@ -155,15 +155,11 @@ public class SearchController extends Controller {
      * @author Smit Parmar
      *
      */
-    public CompletionStage<Result> commits(String user, String repo, Http.Request request)  {
+    public CompletionStage<Result> commits(String user, String repo, Http.Request request)  throws Exception {
         CompletionStage<Result> resultCompletionStage = null;
-        try{
-            resultCompletionStage =  this.cache.getOrElseUpdate("commits." + user + "." + repo,() -> commitService.getCommitStats(user,repo)
-                    .thenApplyAsync(output -> ok(views.html.commits.render(output, request))));
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
+
+        resultCompletionStage =  this.cache.getOrElseUpdate("commits." + user + "." + repo,() -> commitService.getCommitStats(user,repo)
+                .thenApplyAsync(output -> ok(views.html.commits.render(output, request))));
 
         return resultCompletionStage;
     }
