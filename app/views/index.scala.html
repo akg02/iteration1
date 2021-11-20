@@ -3,7 +3,7 @@
 
 @main("Welcome to Gitterific!") {
 
-    @helper.form(routes.HomeController.search, 'class -> "input-group mb-3 mt-3") {
+    @helper.form(routes.SearchController.search, 'class -> "input-group mb-3 mt-3") {
         <div class="input-group mb-3 mt-3">
             @helper.CSRF.formField
             <input type="text" class="form-control" placeholder="Enter search terms" id="input" name="input">

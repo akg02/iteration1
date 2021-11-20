@@ -1,16 +1,16 @@
-GET    /                            controllers.HomeController.index(request: Request)
-POST   /search                      controllers.HomeController.search(request: Request)
+GET    /                            controllers.SearchController.index(request: Request)
+POST   /search                      controllers.SearchController.search(request: Request)
 
-GET    /topic/:topic                controllers.HomeController.topic(topic: String)
+GET    /topic/:topic                controllers.SearchController.topic(topic: String)
 
-GET    /profile/:user               controllers.HomeController.profile(user: String)
+GET    /profile/:user               controllers.SearchController.profile(user: String)
 
-GET    /repository/:user/:repo      controllers.HomeController.repository(user: String, repo: String)
+GET    /repository/:user/:repo      controllers.SearchController.repository(user: String, repo: String)
 
 
-GET    /issueStatistics/:user/:repo			controllers.HomeController.issueStatistics(user: String, repo: String, request:Request)
+GET    /issueStatistics/:user/:repo			controllers.SearchController.issueStatistics(user: String, repo: String, request:Request)
 
-GET    /commits/:user/:repo         controllers.HomeController.commits(user: String, repo: String, request: Request)
+GET    /commits/:user/:repo         controllers.SearchController.commits(user: String, repo: String, request: Request)
 
 
 # Map static resources from the /public folder to the /assets URL path
