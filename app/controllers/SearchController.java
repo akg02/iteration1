@@ -17,6 +17,7 @@ import services.CommitService;
 import services.IssueService;
 import services.RepositoryProfileService;
 import views.html.repository;
+import services.ProfileInfoService;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +40,7 @@ public class SearchController extends Controller {
 
     private final CommitService commitService;
     private final RepositoryProfileService repositoryProfileService;
+    private final ProfileInfoService profileInfoService;
 
     private AsyncCacheApi cache;
     
@@ -53,6 +55,8 @@ public class SearchController extends Controller {
         this.commitService = new CommitService(github);
         this.repositoryProfileService = new RepositoryProfileService(github);
         this.cache = asyncCacheApi;
+        this.profileInfoService = new ProfileInfoService(github);
+
     }
 
     /**
@@ -96,8 +100,12 @@ public class SearchController extends Controller {
      * Route for profile
      */
     public CompletionStage<Result> profile(String user) {
-    	return github.displayUserProfile(user).thenApply(r -> ok(views.html.profile.render(r)));
-        //return CompletableFuture.completedFuture(ok(views.html.profile.render(user)));
+        CompletionStage<Result> cache = this.cache
+        		.getOrElseUpdate("repository." + user, () -> profileInfoService.getRepoList(user)
+        				.thenApply(r -> ok(views.html.profile.render(r))));
+        return cache;
+    	//return github.displayUserProfile(user, repoList).thenApply(r -> ok(views.html.profile.render(r)));
+        
     }
 
     /**

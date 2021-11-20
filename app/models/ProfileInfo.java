@@ -19,14 +19,14 @@ public class ProfileInfo {
 	public String twitter_username;
 	public int followers;
 	public int following;
-	//public List<Repository> public_repos;
+	public List<String> repos;
 	
 	public ProfileInfo() {
 		
 	}
 	
 	public ProfileInfo(String login, String name,	String company, String blog, String location, String email, String bio,
-			String twitter_username, int followers, int following) {
+			String twitter_username, int followers, int following, List<String> repos) {
 		this.login = login;
 		this.name = name;
 		this.company = company;
@@ -37,7 +37,7 @@ public class ProfileInfo {
 		this.twitter_username = twitter_username;
 		this.followers = followers; 
 		this.following = following;
-		//this.public_repos = public_repos;
+		this.repos = repos;
 		
 	}
 

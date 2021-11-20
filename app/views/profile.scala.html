@@ -1,6 +1,8 @@
 @(details: ProfileInfo)
 
 @main("Profile of " + details ) {
+	<h3 class="h3" style="margin-left: 20px; margin-top:10px;"> User Profile Details </h3>
+
     <li><Strong>Profile page: </Strong>  <a href="https://github.com/@details.login">@details.login</a>
     <li><Strong>User name: </Strong>@details.name 
     <li><Strong>Bio: </Strong> @details.bio
@@ -11,5 +13,16 @@
     <li><Strong>Twitter username: </Strong>@details.twitter_username    		
     <li><Strong>Followers: </Strong> @details.followers
     <li><Strong>Following: </Strong>@details.following
+    
+    @if(details.repos.isEmpty()){
+    <li><Strong>Repository: </Strong> No repos
+    } else {
+    <li><Strong>Repository: </Strong> 
+    	@for(repo <- details.repos){
+    	<p style="margin-left: 50px;">
+    	<a href="/repository/@details.login/@repo">@repo</a> </p>
+    	 
+    	}
+    }
     
 }

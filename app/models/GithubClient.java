@@ -189,13 +189,15 @@ public class GithubClient {
      * @param user name of the user
      * @return object of ProfileInfo
      */
-    public CompletionStage<ProfileInfo> displayUserProfile(String user){
+    public CompletionStage<ProfileInfo> displayUserProfile(String user, List<String> repoList){
     	WSRequest request = client.url(baseURL + "/users/" + user);
     	return request.addHeader("Accept", "application/vnd.github.v3+json")
                 .addHeader("Authorization", token)
     			.get()
     			.thenApply(r -> {
     				ProfileInfo profileInfo = Json.fromJson(r.asJson(), ProfileInfo.class);
+    				profileInfo.repos = repoList;
+    				
     				return profileInfo;
     			});
     	
@@ -211,21 +213,43 @@ public class GithubClient {
      * @author Joon Seung Hwang
    
      */
-    public CompletableFuture<ArrayList<String>> getAllRepoList(String user){
+//    public CompletableFuture<ArrayList<String>> getAllRepoList(String user){
+//    	WSRequest request = client.url(baseURL + "/users/" + user + "/repos");
+//    	return request.addHeader("Accept", "application/vnd.github.v3+json")
+//    			.get()
+//    			.thenApply(r -> {
+//    				ArrayList<String> repoList = new ArrayList<>();
+//    				 int f = 0;
+//                     while(r.asJson().get(f)!=null){
+//                    	 repoList.add(r.asJson().get(f).get("name").asText());
+//                    	 f++;
+//                     }
+//    				return repoList;
+//    				
+//    			}).toCompletableFuture();
+//    	
+//    }
+//    
+   
+    public CompletionStage<List<String>> getAllRepoList(String user) {
     	WSRequest request = client.url(baseURL + "/users/" + user + "/repos");
-    	return request.addHeader("Accept", "application/vnd.github.v3+json")
-    			.get()
-    			.thenApply(r -> {
-    				ArrayList<String> repoList = new ArrayList<>();
-    				 int f = 0;
-                     while(r.asJson().get(f)!=null){
-                    	 repoList.add(r.asJson().get(f).get("name").asText());
-                    	 f++;
-                     }
-    				return repoList;
-    				
-    			}).toCompletableFuture();
-    	
+        return request
+                .addHeader("Authorization", token)
+                .addHeader("Accept", "application/vnd.github.v3+json")
+                .get()
+                .thenApply(r -> {
+                        List<String> issueList = new ArrayList<>();
+                        String name = "name";
+                        int f = 0;
+                        while (r.asJson().get(f) != null) {
+                            issueList.add(r.asJson().get(f).get(name).asText());
+                            f++;
+                        }
+                        return issueList;
+//                    SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
+//                    searchResult.input = user;
+//                    return searchResult.repositories;
+                });
     }
 
 }
