@@ -70,7 +70,7 @@ public class SearchController extends Controller {
     /**
      * An endpoint that performs a search and adds the result to the history for the current session
      */
-    @Cached(key="search")
+   
     public CompletionStage<Result> search(Http.Request request) {
         Form<SearchForm> boundForm = searchForm.bindFromRequest(request);
         if (boundForm.hasErrors()) {
@@ -78,10 +78,10 @@ public class SearchController extends Controller {
         } else {
             String searchInput = boundForm.get().getInput();
             String sessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
-            return github.searchRepositories(searchInput, false)
+            return this.cache.getOrElseUpdate("search."+searchInput,()->github.searchRepositories(searchInput, false)
                     .thenAccept(searchResult -> searchHistory.addToHistory(sessionId, searchResult))
-                    .thenApply(nullResult -> redirect(routes.SearchController.index()).withHeader(CACHE_CONTROL, "max-age=3600")
-                            .addingToSession(request, SESSION_ID, sessionId));
+                    .thenApply(nullResult -> redirect(routes.SearchController.index())
+                            .addingToSession(request, SESSION_ID, sessionId)));
         }
     }
 
