@@ -17,17 +17,6 @@ public class CommitStats {
     public CommitStats() {
     }
 
-    /**
-     * This is parameterised Constructor
-     */
-    public CommitStats(String author, String email, int addition, int deletion, String sha) {
-        this.name = author;
-        this.email = email;
-        this.addition = addition;
-        this.deletion = deletion;
-        this.sha = sha;
-    }
-
     public String getName() {
         return name;
     }
@@ -68,14 +57,4 @@ public class CommitStats {
         this.sha = sha;
     }
 
-    @Override
-    public String toString() {
-        return "CommitStats{" +
-                "name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", addition=" + addition +
-                ", deletion=" + deletion +
-                ", sha='" + sha + '\'' +
-                "}\n";
-    }
 }

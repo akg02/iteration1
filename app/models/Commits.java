@@ -52,13 +52,4 @@ public class Commits {
         this.count = count;
     }
 
-    @Override
-    public String toString() {
-        return "Commits{" +
-                "userName='" + userName + '\'' +
-                ", addition=" + addition +
-                ", deletion=" + deletion +
-                ", count=" + count +
-                '}';
-    }
 }
