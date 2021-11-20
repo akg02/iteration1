@@ -167,16 +167,10 @@ public class GithubClient {
      *
      * @author Smit Parmar
      */
-    public ArrayList<CommitStats> getCommitStatFromList(String user, String repo, ArrayList<String> list)  {
+    public ArrayList<CommitStats> getCommitStatFromList(String user, String repo, ArrayList<String> list) throws Exception  {
         ArrayList<CommitStats> commitStatList = new ArrayList<>();
         for(String s: list){
-            try {
                 commitStatList.add(getCommitStatByID(user, repo, s).get());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
         }
         return commitStatList;
     }
