@@ -2,17 +2,26 @@
 @(commits: List[Map[String, Integer]])(implicit request: Request)
 
 @main("Commit Details") {
+<h1>All commit stats</h1>
+@commits.get(0)<br/>
+@commits.get(1)<br/>
+@commits.get(2)<br/>
+@commits.get(3)<br/>
+@commits.get(4)<br/>
+@commits.get(5)<br/>
+<h1>top 10 committers</h1>
 <ol>
-@for((key, value) <- commits.get(0)){
+@for((key, value) <- commits.get(6)){
+
 <li><a href="/profile/@key">@key</a>
     <ul>
-        <li>Count: @commits.get(0).get(key)</li>
-        <li>MaxAddition: @commits.get(1).get(key)</li>
-        <li>Min Addition: @commits.get(2).get(key)</li>
-        <li>Average Addition: @(commits.get(3).get(key)/commits.get(0).get(key))</li>
-        <li>Max Deletion: @commits.get(4).get(key)</li>
-        <li>Min Deletion: @commits.get(5).get(key)</li>
-        <li>Average Deletion: @(commits.get(6).get(key)/commits.get(0).get(key))</li>
+        <li>Count: @commits.get(6).get(key)</li>
+        <li>MaxAddition: @commits.get(7).get(key)</li>
+        <li>Min Addition: @commits.get(8).get(key)</li>
+        <li>Average Addition: @(commits.get(9).get(key)/commits.get(6).get(key))</li>
+        <li>Max Deletion: @commits.get(10).get(key)</li>
+        <li>Min Deletion: @commits.get(11).get(key)</li>
+        <li>Average Deletion: @(commits.get(12).get(key)/commits.get(10).get(key))</li>
     </ul>
 </li>
 }

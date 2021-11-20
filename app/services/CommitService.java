@@ -45,6 +45,30 @@ public class CommitService {
                         .map(op -> new Commits(op.getName(), op.getAddition(), op.getDeletion()))
                         .collect(Collectors.toList());
 
+                Integer allMaxAdditionCommit = commitStatsList.stream()
+                        .max((Comparator.comparing(CommitStats::getAddition)))
+                        .get().getAddition();
+
+                Integer allMinAdditionCommit = commitStatsList.stream()
+                        .min((Comparator.comparing(CommitStats::getAddition)))
+                        .get().getAddition();
+
+                Integer allAvgAdditionCommit = commitStatsList.stream()
+                        .mapToInt(CommitStats::getAddition)
+                        .sum();
+
+                Integer allMaxDeletionCommit = commitStatsList.stream()
+                        .max((Comparator.comparing(CommitStats::getDeletion)))
+                        .get().getDeletion();
+
+                Integer allMinDeletionCommit = commitStatsList.stream()
+                        .min((Comparator.comparing(CommitStats::getDeletion)))
+                        .get().getDeletion();
+
+                Integer allAvgDeletionCommit = commitStatsList.stream()
+                        .mapToInt(CommitStats::getDeletion)
+                        .sum();
+
                 Map<String, Integer> result = commitList.parallelStream()
                         .collect(Collectors.toMap(w -> w.getUserName(), w -> 1, Integer::sum));
 
@@ -73,6 +97,36 @@ public class CommitService {
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
 
                 List<Map<String, Integer>> resultList = new ArrayList<>();
+                HashMap<String, Integer> maxAllCommitAddition = new HashMap<String, Integer>() {{
+                    put("maxAddition", allMaxAdditionCommit);
+                }};
+
+                HashMap<String, Integer> minAllCommitAddition = new HashMap<String, Integer>() {{
+                    put("minAddition", allMinAdditionCommit);
+                }};
+
+                HashMap<String, Integer> avgAllCommitAddition = new HashMap<String, Integer>() {{
+                    put("avgAddition", allAvgAdditionCommit/commitStatsList.size());
+                }};
+
+                HashMap<String, Integer> maxAllCommitDeletion = new HashMap<String, Integer>() {{
+                    put("maxDeletion", allMaxDeletionCommit);
+                }};
+
+                HashMap<String, Integer> minAllCommitDeletion = new HashMap<String, Integer>() {{
+                    put("minDeletion", allMinDeletionCommit);
+                }};
+
+                HashMap<String, Integer> avAllCommitDeletion = new HashMap<String, Integer>() {{
+                    put("avgDeletion", allAvgDeletionCommit/commitStatsList.size());
+                }};
+
+                resultList.add(maxAllCommitAddition);
+                resultList.add(minAllCommitAddition);
+                resultList.add(avgAllCommitAddition);
+                resultList.add(maxAllCommitDeletion);
+                resultList.add(minAllCommitDeletion);
+                resultList.add(avAllCommitDeletion);
                 resultList.add(result);
                 resultList.add(maxAddition);
                 resultList.add(minAddition);
