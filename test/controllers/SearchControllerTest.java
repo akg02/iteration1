@@ -190,7 +190,7 @@ public class SearchControllerTest extends WithApplication {
      * @author Joon Seung Hwang
      */
     @Test
-    public void testProfile() {
+    public void testProfileNoRepo() {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(Helpers.GET)
                 .uri("/profile/gloria0112");
