@@ -664,7 +664,7 @@ public class GithubClientTest {
          assertEquals("123", profileInfo.getTwitter());
          assertEquals(0, profileInfo.getFollowers());
          assertEquals(1, profileInfo.getFollowing());
-         assertEquals("Desta25", profileInfo.getRepos.get(1));
+         assertEquals("Desta25", profileInfo.getRepos().get(1));
          Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
                
     }
