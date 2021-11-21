@@ -172,17 +172,34 @@ public class SearchControllerTest extends WithApplication {
         assertEquals(Http.Status.OK, result.status());
         String html = Helpers.contentAsString(result);
         
-        assertTrue(html.contains("<li><Strong>Profile page: </Strong>  <a href=\"https://github.com/mayjoonjuly\">mayjoonjuly</a>"));
-        assertTrue(html.contains("<li><Strong>User name: </Strong>Joon Seung"));
-        assertTrue(html.contains("<li><Strong>Bio: </Strong>Testing"));
-        assertTrue(html.contains("<li><Strong>Company: </Strong>abc"));
-        assertTrue(html.contains("<li><Strong>Blog: </Strong>www"));
-        assertTrue(html.contains("<li><Strong>Location: </Strong>montreal"));
-        assertTrue(html.contains("<li><Strong>Email: </Strong>"));
-        assertTrue(html.contains("<li><Strong>Twitter username: </Strong>123"));
-        assertTrue(html.contains("<li><Strong>Followers: </Strong>0"));
-        assertTrue(html.contains("<li><Strong>Following: </Strong>1"));
+        assertTrue(html.contains("mayjoonjuly"));
+        assertTrue(html.contains("Joon"));
+        assertTrue(html.contains("Testing"));
+        assertTrue(html.contains("abc"));
+        assertTrue(html.contains("www"));
+        assertTrue(html.contains("montreal"));
+        assertTrue(html.contains("123"));
+        assertTrue(html.contains("0"));
+        assertTrue(html.contains("1"));
         assertTrue(html.contains("Desta25"));
+        
+    }
+    
+    /**
+     * Test case for profile() method when no repo list
+     * @author Joon Seung Hwang
+     */
+    @Test
+    public void testProfile() {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(Helpers.GET)
+                .uri("/profile/gloria0112");
+        Result result = Helpers.route(app, request);
+        assertEquals(Http.Status.OK, result.status());
+        String html = Helpers.contentAsString(result);
+        
+        assertTrue(html.contains("gloria0112"));
+        assertTrue(html.contains("No repos"));
         
     }
 
