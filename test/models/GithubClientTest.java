@@ -600,6 +600,10 @@ public class GithubClientTest {
         Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
     }
     
+    /**
+     * test case for displayUserProfile
+     * @author Joon Seung Hwang
+     */
     @Test
     public void testDisplayUserProfile() throws Exception {
     	 WSClient client = mock(WSClient.class);
@@ -607,7 +611,7 @@ public class GithubClientTest {
          WSResponse response = mock(WSResponse.class);
          List<String> repoList = new ArrayList<>();
          
-         when(client.url("https://api.github.com/users/mayjoonjuly"))).thenReturn(request);
+         when(client.url("https://api.github.com/users/mayjoonjuly")).thenReturn(request);
          when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
          when(request.addHeader("Authorization", "token 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")).thenReturn(request);
          when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
@@ -649,17 +653,20 @@ public class GithubClientTest {
          when(response.asJson()).thenReturn(Json.parse(responseString));
          GithubClient github = new GithubClient(client, mockCache(null), ConfigFactory.load());
          CompletionStage<ProfileInfo> future = github.displayUserProfile("mayjoonjuly",repoList);
-         RepositoryProfile repositoryProfile = future.toCompletableFuture().get();
-         assertEquals("dinosaur-name-generation-rnn", repositoryProfile.getName());
-         assertEquals("A dinosaur name generation using RNN in NumPy.", repositoryProfile.getDescription());
-         assertEquals("Sat Oct 17 06:10:38 EDT 2020", repositoryProfile.getCreated_at().toString());
-         assertEquals("Sat Nov 20 11:52:33 EST 2021", repositoryProfile.getUpdated_at().toString());
-         assertEquals(1, repositoryProfile.getStargazers_count());
-         assertEquals(0, repositoryProfile.getForks_count());
-         assertEquals(0, repositoryProfile.getIssues().size());
-         assertEquals("neural-network", repositoryProfile.getTopics().get(0));
+         ProfileInfo profileInfo = future.toCompletableFuture().get();
+         assertEquals("mayjoonjuly", profileInfo.getLogin());
+         assertEquals("Joon Seung", profileInfo.getName());
+         assertEquals("Testing", profileInfo.getBio());
+         assertEquals("abc", profileInfo.getCompany());
+         assertEquals("www", profileInfo.getBlog());
+         assertEquals("montreal", profileInfo.getLocation());
+         assertEquals(null, profileInfo.getEmail());
+         assertEquals("123", profileInfo.getTwitter());
+         assertEquals(0, profileInfo.getFollowers());
+         assertEquals(1, profileInfo.getFollowing());
+         //assertEquals("Desta25", profileInfo.getRepos.get(1));
          Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
-      
+               
     }
 
 }
