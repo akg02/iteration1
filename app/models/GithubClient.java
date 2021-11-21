@@ -201,7 +201,7 @@ public class GithubClient {
     			.get()
     			.thenApply(r -> {
     				ProfileInfo profileInfo = Json.fromJson(r.asJson(), ProfileInfo.class);
-    				profileInfo.repos = repoList;
+    				profileInfo.setRepos(repoList);
     				
     				return profileInfo;
     			});

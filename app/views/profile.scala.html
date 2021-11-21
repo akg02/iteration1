@@ -1,26 +1,26 @@
 @(details: ProfileInfo)
 
-@main("Profile of " + details ) {
+@main("Profile of " + details.getName ) {
 	<h3 class="h3" style="margin-left: 20px; margin-top:10px;"> User Profile Details </h3>
 
-    <li><Strong>Profile page: </Strong>  <a href="https://github.com/@details.login">@details.login</a>
-    <li><Strong>User name: </Strong>@details.name 
-    <li><Strong>Bio: </Strong> @details.bio
-    <li><Strong>Company: </Strong>@details.company
-    <li><Strong>Blog: </Strong>@details.blog
-    <li><Strong>Location: </Strong> @details.location
-    <li><Strong>Email: </Strong> @details.email
-    <li><Strong>Twitter username: </Strong>@details.twitter_username    		
-    <li><Strong>Followers: </Strong> @details.followers
-    <li><Strong>Following: </Strong>@details.following
+    <li><Strong>Profile page: </Strong>  <a href="https://github.com/@details.getLogin">@details.getLogin</a>
+    <li><Strong>User name: </Strong>@details.getName 
+    <li><Strong>Bio: </Strong>@details.getBio
+    <li><Strong>Company: </Strong>@details.getCompany
+    <li><Strong>Blog: </Strong>@details.getBlog
+    <li><Strong>Location: </Strong>@details.getLocation
+    <li><Strong>Email: </Strong>@details.getEmail
+    <li><Strong>Twitter: </Strong>@details.getTwitter		
+    <li><Strong>Followers: </Strong>@details.getFollowers
+    <li><Strong>Following: </Strong>@details.getFollowing
     
-    @if(details.repos.isEmpty()){
+    @if(details.getRepos.isEmpty()){
     <li><Strong>Repository: </Strong> No repos
     } else {
     <li><Strong>Repository: </Strong> 
-    	@for(repo <- details.repos){
+    	@for(repo <- details.getRepos){
     	<p style="margin-left: 50px;">
-    	<a href="/repository/@details.login/@repo">@repo</a> </p>
+    	<a href="/repository/@details.getLogin/@repo">@repo</a> </p>
     	 
     	}
     }

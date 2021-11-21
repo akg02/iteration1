@@ -1,5 +1,6 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
@@ -8,17 +9,28 @@ import java.util.List;
  * 
  */
 public class ProfileInfo {
-	public String login;
-	public String name;
-	public String company;
-	public String blog;
-	public String location;
-	public String email;
-	public String bio;
-	public String twitter_username;
-	public int followers;
-	public int following;
-	public List<String> repos;
+	@JsonProperty("login")
+	private String login;
+	@JsonProperty("name")
+	private String name;
+	@JsonProperty("company")
+	private String company;
+	@JsonProperty("blog")
+	private String blog;
+	@JsonProperty("location")
+	private String location;
+	@JsonProperty("email")
+	private String email;
+	@JsonProperty("bio")
+	private String bio;
+	@JsonProperty("twitter_username")
+	private String twitter_username;
+	@JsonProperty("followers")
+	private int followers;
+	@JsonProperty("following")
+	private int following;
+	
+	private List<String> repos;
 	
 	/**
 	 * Default constructor for json
@@ -26,24 +38,80 @@ public class ProfileInfo {
 	public ProfileInfo() {
 		
 	}
+	/**
+	 * @return login name
+	 */
+	public String getLogin() {
+		return login;
+	}
 	
 	/**
-	 * Parameterized Constructor 
+	 * @return name of the user
 	 */
-	public ProfileInfo(String login, String name,	String company, String blog, String location, String email, String bio,
-			String twitter_username, int followers, int following, List<String> repos) {
-		this.login = login;
-		this.name = name;
-		this.company = company;
-		this.blog = blog;
-		this.location = location; 
-		this.email = email;
-		this.bio = bio;
-		this.twitter_username = twitter_username;
-		this.followers = followers; 
-		this.following = following;
-		this.repos = repos;
-		
+	public String getName() {
+		return name;
 	}
+	/**
+	 * @return company name
+	 */
+	public String getCompany() {
+		return company;
+	}
+	/**
+	 * @return blog name
+	 */
+	public String getBlog() {
+		return blog;
+	}
+	/**
+	 * @return location
+	 */
+	public String getLocation() {
+		return location;
+	}
+	/**
+	 * @return email address
+	 */
+	public String getEmail() {
+		return email;
+	}
+	/**
+	 * @return bio description of the user
+	 */
+	public String getBio() {
+		return bio;
+	}
+	/**
+	 * @return twitter name
+	 */
+	public String getTwitter() {
+		return twitter_username;
+	}
+	/**
+	 * @return number of followers
+	 */
+	public int getFollowers() {
+		return followers;
+	}
+	/**
+	 * @return number of following
+	 */
+	public int getFollowing() {
+		return following;
+	}
+	/**
+	 * @return list of Strings of repository names
+	 */
+	public List<String> getRepos() {
+		return repos;
+	}
+	/**
+	 * Setter to set the repos attribute
+	 * @param repos list of string of repository names
+	 */
+	public void setRepos(List<String> repos) {
+		this.repos = repos;
+	}
+	
 
 }

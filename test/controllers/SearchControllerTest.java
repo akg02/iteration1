@@ -159,14 +159,48 @@ public class SearchControllerTest extends WithApplication {
         assertTrue(html.contains("href=\"/topic/security\""));
     }
 
+    /**
+     * Test case for profile() method
+     * @author Joon Seung Hwang
+     */
     @Test
     public void testProfile() {
-        // TODO: Individual task
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(Helpers.GET)
-                .uri("/profile/concordia");
+                .uri("/profile/mayjoonjuly");
         Result result = Helpers.route(app, request);
         assertEquals(Http.Status.OK, result.status());
+        String html = Helpers.contentAsString(result);
+        
+        assertTrue(html.contains("mayjoonjuly"));
+        assertTrue(html.contains("Joon"));
+        assertTrue(html.contains("Testing"));
+        assertTrue(html.contains("abc"));
+        assertTrue(html.contains("www"));
+        assertTrue(html.contains("montreal"));
+        assertTrue(html.contains("123"));
+        assertTrue(html.contains("0"));
+        assertTrue(html.contains("1"));
+        assertTrue(html.contains("Desta25"));
+        
+    }
+    
+    /**
+     * Test case for profile() method when no repo list
+     * @author Joon Seung Hwang
+     */
+    @Test
+    public void testProfileNoRepo() {
+        Http.RequestBuilder request = new Http.RequestBuilder()
+                .method(Helpers.GET)
+                .uri("/profile/gloria0112");
+        Result result = Helpers.route(app, request);
+        assertEquals(Http.Status.OK, result.status());
+        String html = Helpers.contentAsString(result);
+        
+        assertTrue(html.contains("gloria0112"));
+        assertTrue(html.contains("No repos"));
+        
     }
 
     /**
