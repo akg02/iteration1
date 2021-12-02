@@ -13,5 +13,9 @@ GET    /issueStatistics/:user/:repo			controllers.SearchController.issueStatisti
 GET    /commits/:user/:repo         controllers.SearchController.commits(user: String, repo: String, request: Request)
 
 
+GET     /timer                      controllers.SearchController.timeMe(request: Request)
+
+
+GET     /ws                         controllers.SearchController.ws
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

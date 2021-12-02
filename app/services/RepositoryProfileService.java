@@ -5,6 +5,7 @@ import models.GithubClient;
 import models.RepositoryProfile;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -15,9 +16,12 @@ import java.util.stream.Collectors;
  * @author Sagar Sanghani
  * @version 1
  */
+@Singleton
 public class RepositoryProfileService {
-    private final GithubClient github;
+    private static GithubClient github = null;
 
+
+    private static final RepositoryProfileService instance = new RepositoryProfileService(github);
     /**
      * This is a Parameterised Constructor
      * @param github object of GithubClient, used for making API calls
@@ -43,6 +47,10 @@ public class RepositoryProfileService {
                 .thenCompose(il2 -> github.getRepositoryDetails(user, repo, il2));
 
         return repoProfile;
+    }
+
+    public static RepositoryProfileService getInstance(){
+        return instance;
     }
 
 }

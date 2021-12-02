@@ -1,5 +1,12 @@
 package controllers;
 
+//import actors.MyUserActor;
+import actors.RepositoryActor;
+import actors.TimeActor;
+import actors.UserActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.stream.Materializer;
 import com.google.inject.Inject;
 
 import models.GithubClient;
@@ -9,9 +16,11 @@ import play.cache.AsyncCacheApi;
 import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
+import play.libs.streams.ActorFlow;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.mvc.WebSocket;
 import services.CommitService;
 import services.IssueService;
 import services.RepositoryProfileService;
@@ -41,13 +50,21 @@ public class SearchController extends Controller {
     private final ProfileInfoService profileInfoService;
 
     private AsyncCacheApi cache;
+
+    @Inject
+    private ActorSystem actorSystem;
+
+    @Inject
+    private Materializer materializer;
+
+    private ActorRef repoActor;
     
 
     /** The SearchController constructor
      * @author Hop Nguyen
      */
     @Inject
-    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi) {
+    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi, ActorSystem system) {
         this.github = github;
         this.searchForm = formFactory.form(SearchForm.class);
         this.messagesApi = messagesApi;
@@ -58,8 +75,19 @@ public class SearchController extends Controller {
         this.cache = asyncCacheApi;
         this.profileInfoService = new ProfileInfoService(github);
 
+        system.actorOf(RepositoryActor.getProps(), "repoActor");
+
+        //system.actorOf(TimeActor.getProps(), "timeActor");
+
     }
 
+    public Result timeMe(Http.Request request) {
+        return ok(views.html.timer.render(request));
+    }
+
+    public WebSocket ws() {
+        return WebSocket.Json.accept(request -> ActorFlow.actorRef(UserActor::props, actorSystem, materializer));
+    }
     /**
      * The homepage which displays the search history of the current session
      * @author Hop Nguyen
