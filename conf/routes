@@ -1,4 +1,5 @@
 GET    /                            controllers.SearchController.index(request: Request)
+GET    /index1                      controllers.SearchController.index1(request: Request)
 POST   /search                      controllers.SearchController.search(request: Request)
 
 GET    /topic/:topic                controllers.SearchController.topic(topic: String)
@@ -12,6 +13,7 @@ GET    /issueStatistics/:user/:repo			controllers.SearchController.issueStatisti
 
 GET    /commits/:user/:repo         controllers.SearchController.commits(user: String, repo: String, request: Request)
 
+GET     /ws                         controllers.SearchController.ws
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

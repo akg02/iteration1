@@ -16,7 +16,6 @@ import services.CommitService;
 public class CommitActor extends AbstractActorWithTimers {
 
     private Set<ActorRef> userActors;
-    private static GithubClient githubClient;
     private  CommitService commitService = CommitService.getInstance();
 
     private static final class Tick{
@@ -52,7 +51,8 @@ public class CommitActor extends AbstractActorWithTimers {
     }
 
     private void notifyClients(){
-        commitService.getCommitStats("facebook","react").thenAcceptAsync(list -> {
+        commitService.getCommitStats("n8n-io","n8n").thenAcceptAsync(list -> {
+
             UserActor.CommitMessage tMsg = new UserActor.CommitMessage(list);
             userActors.forEach(ar -> ar.tell(tMsg, self()));
         });
