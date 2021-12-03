@@ -70,18 +70,10 @@ public class RepositoryActor extends AbstractActorWithTimers {
 
     private void notifyClients() {
         rpService.getRepoDetails(this.name, this.repo).thenAccept(r -> {
-            System.out.println(r.getName() + "  " + r.getDescription() );
             UserActor.RepoMessage rMsg = new UserActor.RepoMessage(r);
             myUserActors.forEach(ar -> ar.tell(rMsg, self()));
         });
     }
-
-//    private void gettingRepoDetails(String name, String repo) throws ExecutionException, InterruptedException {
-//        CompletionStage<RepositoryProfile> rpd = rpService.getRepoDetails(name, repo);
-//        MyUserActor.RepoDetails rMsg = rpd.thenApply(r -> new MyUserActor.RepoDetails(r.getName(), r.getDescription(), r.getStargazers_count())).toCompletableFuture().get();
-//        myUserActors.forEach(ar -> ar.tell(rMsg, self()));
-//
-//    }
 
 
 
