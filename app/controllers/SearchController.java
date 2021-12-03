@@ -75,7 +75,7 @@ public class SearchController extends Controller {
         this.cache = asyncCacheApi;
         this.profileInfoService = new ProfileInfoService(github);
 
-        system.actorOf(RepositoryActor.getProps(), "repoActor");
+        //system.actorOf(RepositoryActor.getProps(), "repoActor");
 
         //system.actorOf(TimeActor.getProps(), "timeActor");
 
@@ -87,6 +87,11 @@ public class SearchController extends Controller {
 
     public WebSocket ws() {
         return WebSocket.Json.accept(request -> ActorFlow.actorRef(UserActor::props, actorSystem, materializer));
+    }
+
+    public Result mytestRepo(Http.Request request, String name, String repo){
+        actorSystem.actorOf(RepositoryActor.getProps(name, repo), "myrepoActor");
+        return ok(views.html.repo2.render(request));
     }
     /**
      * The homepage which displays the search history of the current session

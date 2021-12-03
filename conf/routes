@@ -15,6 +15,7 @@ GET    /commits/:user/:repo         controllers.SearchController.commits(user: S
 
 GET     /timer                      controllers.SearchController.timeMe(request: Request)
 
+GET     /repo2/:user/:repo          controllers.SearchController.mytestRepo(request: Request, user: String, repo: String)
 
 GET     /ws                         controllers.SearchController.ws
 # Map static resources from the /public folder to the /assets URL path

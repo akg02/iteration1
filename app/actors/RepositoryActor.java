@@ -20,10 +20,15 @@ public class RepositoryActor extends AbstractActorWithTimers {
 
     private Set<ActorRef> myUserActors;
     public RepositoryProfileService rpService = RepositoryProfileService.getInstance();
+    private String name;
+    private String repo;
 
     @Inject
-    private RepositoryActor(){
+    private RepositoryActor(String name, String repo){
         this.myUserActors = new HashSet<>();
+        this.name = name;
+        this.repo = repo;
+
     }
 
     static public class Tick{
@@ -43,13 +48,13 @@ public class RepositoryActor extends AbstractActorWithTimers {
 //        }
 //    }
 
-    static public Props getProps() {
-        return Props.create(RepositoryActor.class, () -> new RepositoryActor());
+    static public Props getProps(String n, String r) {
+        return Props.create(RepositoryActor.class, n, r);
     }
 
     @Override
     public void preStart() {
-        getTimers().startPeriodicTimer("Timer", new Tick(), Duration.create(60, TimeUnit.SECONDS));
+        getTimers().startPeriodicTimer("Timer", new Tick(), Duration.create(5, TimeUnit.SECONDS));
         //new FetchRepo("Sagar7421", "justADummyRepo");
     }
 
@@ -64,7 +69,8 @@ public class RepositoryActor extends AbstractActorWithTimers {
     }
 
     private void notifyClients() {
-        rpService.getRepoDetails("Sagar7421", "justADummyRepo").thenAccept(r -> {
+        rpService.getRepoDetails(this.name, this.repo).thenAccept(r -> {
+            System.out.println(r.getName() + "  " + r.getDescription() );
             UserActor.RepoMessage rMsg = new UserActor.RepoMessage(r);
             myUserActors.forEach(ar -> ar.tell(rMsg, self()));
         });

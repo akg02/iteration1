@@ -22,7 +22,7 @@ public class UserActor extends AbstractActor {
     public void preStart() {
         context().actorSelection("/user/timeActor")
                 .tell(new TimeActor.RegisterMsg(), self());
-        context().actorSelection("/user/repoActor")
+        context().actorSelection("/user/myrepoActor")
                 .tell(new RepositoryActor.RegisterMsg(), self());
     }
 
@@ -50,24 +50,25 @@ public class UserActor extends AbstractActor {
 
     static public class RepoMessage{
         public final RepositoryProfile rp;
+        public String name;
+        public String desc;
+        public int star_count;
 
         public RepoMessage(RepositoryProfile rp){
             this.rp = rp;
+            this.name = rp.getName();
+            this.desc = rp.getDescription();
+            this.star_count = rp.getStargazers_count();
         }
 
-        public String getRepoName(){
-            return this.rp.getName();
-        }
 
-        public String getRepoDescription(){
-            return this.rp.getDescription();
-        }
     }
 
     private void sendRepoMessage(RepoMessage rp){
         final ObjectNode response = Json.newObject();
-        response.put("name", rp.getRepoName());
-        response.put("description", rp.getRepoDescription());
+        response.put("name", rp.name);
+        response.put("description", rp.desc);
+        response.put("starC", rp.star_count);
         ws.tell(response, self());
 
     }
