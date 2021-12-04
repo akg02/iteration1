@@ -29,13 +29,17 @@ public class UserActor extends AbstractActor {
                 .tell(new TimeActor.RegisterMsg(), self());
         context().actorSelection("/user/commitActor"+id)
                 .tell(new CommitActor.RegisterMsg(), self());
+        context().actorSelection("/user/myrepoActor_"+id)
+                .tell(new RepositoryActor.RegisterMsg(), self());
+
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-//                .match(TimeMessage.class, this::sendTime)
+                .match(TimeMessage.class, this::sendTime)
                 .match(CommitMessage.class, this::sendCommitMessage)
+                .match(RepoMessage.class, this::sendRepoMessage)
                 .build();
     }
 
@@ -76,4 +80,29 @@ public class UserActor extends AbstractActor {
         ws.tell(response, self());
     }
 
+    static public class RepoMessage{
+        public final RepositoryProfile rp;
+        public String name;
+        public String desc;
+        public int star_count;
+
+        public RepoMessage(RepositoryProfile rp){
+            this.rp = rp;
+            this.name = rp.getName();
+            this.desc = rp.getDescription();
+            this.star_count = rp.getStargazers_count();
+        }
+
+
+    }
+
+    private void sendRepoMessage(RepoMessage rp){
+        final ObjectNode response = Json.newObject();
+        System.out.println(rp.name + "  " + rp.desc);
+        response.put("name", rp.name);
+        response.put("description", rp.desc);
+        response.put("starC", rp.star_count);
+        ws.tell(response, self());
+
+    }
 }

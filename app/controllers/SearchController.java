@@ -1,13 +1,8 @@
 package controllers;
 
-import actors.CommitActor;
-import actors.TimeActor;
-import actors.UserActor;
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.stream.Materializer;
 import com.google.inject.Inject;
 
+import com.typesafe.sslconfig.ssl.FakeChainedKeyStore;
 import models.GithubClient;
 import models.SearchHistory;
 import models.SearchResult;
@@ -50,7 +45,7 @@ public class SearchController extends Controller {
     private final ProfileInfoService profileInfoService;
 
     private AsyncCacheApi cache;
-
+    
 
     @Inject
     ActorSystem actorSystem;
@@ -65,7 +60,7 @@ public class SearchController extends Controller {
      * @author Hop Nguyen
      */
     @Inject
-    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi, ActorSystem actorSystem) {
+    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi) {
         this.github = github;
         this.searchForm = formFactory.form(SearchForm.class);
         this.messagesApi = messagesApi;
@@ -79,8 +74,27 @@ public class SearchController extends Controller {
 
         this.commitActor = actorSystem.actorOf(CommitActor.props(), "commitActor");
         actorSystem.actorOf(TimeActor.props(), "timeActor");
+        //this.repoActor = system.actorOf(RepositoryActor.getProps(), "myrepoActor");
+
+        //system.actorOf(TimeActor.getProps(), "timeActor");
+
     }
 
+    public Result timeMe(Http.Request request) {
+        return ok(views.html.timer.render(request));
+    }
+
+    public WebSocket ws() {
+        return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
+    }
+
+    public Result mytestRepo(Http.Request request, String name, String repo){
+        fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
+        repoActor = actorSystem.actorOf(RepositoryActor.getProps(), "myrepoActor_"+fSessionId);
+
+        actorSystem.actorSelection("/user/myrepoActor_"+fSessionId).tell(new RepositoryActor.Tick(name, repo), repoActor);
+        return ok(views.html.repo2.render(request));
+    }
     /**
      * The homepage which displays the search history of the current session
      * @author Hop Nguyen

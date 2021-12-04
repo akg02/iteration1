@@ -12,5 +12,6 @@ libraryDependencies ++= Seq(
   ws,
   // Java11 requires mockito 4.0.0
   "org.mockito" % "mockito-core" % "4.0.0" % "test",
-  caffeine
+  caffeine,
+  "javax.xml.bind" % "jaxb-api" % "2.3.1",
 )

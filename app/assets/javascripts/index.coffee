@@ -29,3 +29,6 @@ $ ->
         console.log(data)
     $('#top10committers').html data
 
+    $('#name').html(message.name + "<br/>")
+    $('#desc').html(message.description + "<br/>")
+    $('#stars').html(message.starC + "<br/>")
