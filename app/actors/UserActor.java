@@ -31,6 +31,7 @@ public class UserActor extends AbstractActor {
                 .tell(new CommitActor.RegisterMsg(), self());
         context().actorSelection("/user/myrepoActor_"+id)
                 .tell(new RepositoryActor.RegisterMsg(), self());
+        context().actorSelection("/user/issueStatisticsActor"+id).tell(new IssueStatisticsActor.RegisterMsg(), self());
 
     }
 
@@ -40,6 +41,7 @@ public class UserActor extends AbstractActor {
                 .match(TimeMessage.class, this::sendTime)
                 .match(CommitMessage.class, this::sendCommitMessage)
                 .match(RepoMessage.class, this::sendRepoMessage)
+                .match(IssueStatisticsMessage.class, this::sendIssueStatisticsMessage)
                 .build();
     }
 
@@ -48,6 +50,13 @@ public class UserActor extends AbstractActor {
         public CommitMessage(ArrayList<Map<String, Integer>> list){
             this.list = list;
         }
+    }
+    
+    static public class IssueStatisticsMessage {
+    	public final Map<String,Integer> message;
+    	public IssueStatisticsMessage(Map<String,Integer> message) {
+    		this.message = message;
+    	}
     }
 
     private void sendCommitMessage(CommitMessage msg) {
@@ -62,6 +71,12 @@ public class UserActor extends AbstractActor {
         response.put("topCommitters", msg.list.get(6).toString());
 //        response.put("list", msg.list.toString());
         ws.tell(response, self());
+    }
+    
+    private void sendIssueStatisticsMessage(IssueStatisticsMessage message) {
+        final ObjectNode response = Json.newObject();
+        response.put("message", message.message.toString());
+    	ws.tell(response, self());
     }
 
     static public class TimeMessage {

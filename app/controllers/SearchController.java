@@ -1,35 +1,27 @@
 package controllers;
 
-import com.google.inject.Inject;
-
-import actors.RepositoryActor;
-import actors.TimeActor;
-import actors.UserActor;
-import actors.CommitActor;
+import actors.*;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.stream.Materializer;
 import com.google.inject.Inject;
-
-import com.typesafe.sslconfig.ssl.FakeChainedKeyStore;
 import models.GithubClient;
 import models.SearchHistory;
 import models.SearchResult;
-import play.libs.streams.ActorFlow;
 import play.cache.AsyncCacheApi;
 import play.data.Form;
 import play.data.FormFactory;
 import play.i18n.MessagesApi;
+import play.libs.streams.ActorFlow;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 import services.CommitService;
 import services.IssueService;
-import services.RepositoryProfileService;
-import views.html.actor;
-import views.html.repository;
 import services.ProfileInfoService;
+import services.RepositoryProfileService;
+import views.html.repository;
 
 import java.util.List;
 import java.util.UUID;
@@ -64,6 +56,7 @@ public class SearchController extends Controller {
 
     private ActorRef commitActor;
     private ActorRef repoActor;
+    private ActorRef issueStatisticsActor;
     public String fSessionId;
 
     /** The SearchController constructor
@@ -213,11 +206,25 @@ public class SearchController extends Controller {
         return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
     }
 
-    public Result commitSocketPage(Http.Request request, String name, String repo){
+    public WebSocket issueStatisticsSocket() {
+    	return WebSocket.Json.accept(request -> ActorFlow.actorRef(f->UserActor.props(f, fSessionId), actorSystem, materializer));
+    }
+    
+    public Result issueStatisticsPage(Http.Request request,String name, String repo) {
         fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
+        issueStatisticsActor = actorSystem.actorOf(IssueStatisticsActor.props(),"issueStatisticsActor"+fSessionId);
+        
+        actorSystem.actorSelection("/user/issueStatisticsActor"+fSessionId).tell(new IssueStatisticsActor.Tick(name, repo),issueStatisticsActor);
+        return ok(views.html.issueActor.render(request));
+
+    }
+    public Result commitSocketPage(Http.Request request, String name, String repo){
+        fSessionId = UUID.randomUUID().toString();
         commitActor = actorSystem.actorOf(CommitActor.props(), "commitActor"+fSessionId);
+        issueStatisticsActor = actorSystem.actorOf(IssueStatisticsActor.props(), "issueStatisticsActor"+fSessionId);
 
         actorSystem.actorSelection("/user/commitActor"+fSessionId).tell(new CommitActor.Tick(name, repo), commitActor);
+//        actorSystem.actorSelection("/user/issueStatisticsActor"+fSessionId).tell(new IssueStatisticsActor.Tick(name, repo), issueStatisticsActor);
         return ok(views.html.actor.render(request));
     }
 

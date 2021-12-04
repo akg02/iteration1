@@ -9,6 +9,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import models.GithubClient;
 import models.Issue;
@@ -19,10 +20,18 @@ import models.Issue;
  * @version 1 
  *
  */
+@Singleton
 public class IssueService {
 
-	private final GithubClient github;
+	private static GithubClient github=null;
+	
+    private static final IssueService instance = new IssueService(github);
 
+
+    public static IssueService getInstance() {
+        return instance;
+    }
+    
 	@Inject
 	public IssueService(GithubClient github) {
 		this.github = github;
