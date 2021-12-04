@@ -59,6 +59,7 @@ public class SearchController extends Controller {
     Materializer materializer;
 
     private ActorRef commitActor;
+    public String fSessionId;
 
     /** The SearchController constructor
      * @author Hop Nguyen
@@ -184,12 +185,16 @@ public class SearchController extends Controller {
         return resultCompletionStage;
     }
 
-    public WebSocket ws(){
-        return WebSocket.Json.accept(request -> ActorFlow.actorRef(UserActor::props, actorSystem, materializer));
+    public WebSocket commitSocket(){
+        return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
     }
 
-    public Result index1(Http.Request request){
-        return ok(actor.render(request));
+    public Result commitSocketPage(Http.Request request, String name, String repo){
+        fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
+        commitActor = actorSystem.actorOf(CommitActor.props(), "commitActor"+fSessionId);
+
+        actorSystem.actorSelection("/user/commitActor"+fSessionId).tell(new CommitActor.Tick(name, repo), commitActor);
+        return ok(views.html.actor.render(request));
     }
 
 }
