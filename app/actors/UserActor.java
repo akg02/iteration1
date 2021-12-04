@@ -66,6 +66,7 @@ public class UserActor extends AbstractActor {
 
     private void sendRepoMessage(RepoMessage rp){
         final ObjectNode response = Json.newObject();
+        //System.out.println(rp.name + "  " + rp.desc);
         response.put("name", rp.name);
         response.put("description", rp.desc);
         response.put("starC", rp.star_count);

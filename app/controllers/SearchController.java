@@ -75,7 +75,7 @@ public class SearchController extends Controller {
         this.cache = asyncCacheApi;
         this.profileInfoService = new ProfileInfoService(github);
 
-        //system.actorOf(RepositoryActor.getProps(), "repoActor");
+        this.repoActor = system.actorOf(RepositoryActor.getProps(), "myrepoActor");
 
         //system.actorOf(TimeActor.getProps(), "timeActor");
 
@@ -90,7 +90,7 @@ public class SearchController extends Controller {
     }
 
     public Result mytestRepo(Http.Request request, String name, String repo){
-        actorSystem.actorOf(RepositoryActor.getProps(name, repo), "myrepoActor");
+        actorSystem.actorSelection("/user/myrepoActor").tell(new RepositoryActor.Tick(name, repo), repoActor);
         return ok(views.html.repo2.render(request));
     }
     /**
