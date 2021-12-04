@@ -1,0 +1,20 @@
+@import play.mvc.Http.Request
+@(request: Request)
+
+<html lang="en">
+@header("Welcome to Gitterific!") {
+    <script type="text/javascript" src='@routes.Assets.versioned("javascripts/list_repositories.js")'></script>
+    <script type="text/javascript" src='@routes.Assets.versioned("javascripts/search.js")'></script>
+}
+
+@body(routes.SearchController.searchWebSocket.webSocketURL(request)) {
+<div class="input-group mb-3 mt-3">
+    <input type="text" class="form-control" placeholder="Enter search terms" id="search-input" name="search-input">
+    <div class="input-group-append">
+        <button class="btn btn-primary" type="submit" id="search-btn">Search!</button>
+    </div>
+</div>
+<div class="border" id="results">
+</div>
+}
+</html>

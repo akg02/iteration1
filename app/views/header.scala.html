@@ -1,0 +1,9 @@
+@(title: String)(scripts: Html)
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>@title</title>
+    <link rel="stylesheet" media="screen" href='@routes.Assets.versioned("stylesheets/bootstrap.min.css")'>
+    <script type="text/javascript" src='@routes.Assets.versioned("javascripts/jquery-3.6.0.min.js")'></script>
+    @scripts
+</head>

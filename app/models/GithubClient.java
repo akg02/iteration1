@@ -65,7 +65,7 @@ public class GithubClient {
                         searchResult.setInput(query);
                         return searchResult;
                     });
-        }, 3600);
+        }, 5);
     }
 
 	public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {
