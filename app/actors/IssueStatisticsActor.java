@@ -17,7 +17,6 @@ import scala.concurrent.duration.Duration;
 
 public class IssueStatisticsActor extends AbstractActorWithTimers {
 
-	//private final Logger logger = Logger.getLogger(this.getClass().getName());
 	private Set<ActorRef> userActors;
 	private IssueService issueService = IssueService.getInstance();
 
