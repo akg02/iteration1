@@ -9,6 +9,7 @@ import akka.actor.ActorSystem;
 import akka.stream.Materializer;
 import com.google.inject.Inject;
 
+import com.typesafe.sslconfig.ssl.FakeChainedKeyStore;
 import models.GithubClient;
 import models.SearchHistory;
 import models.SearchResult;
@@ -58,6 +59,8 @@ public class SearchController extends Controller {
     private Materializer materializer;
 
     private ActorRef repoActor;
+
+    public String fSessionId;
     
 
     /** The SearchController constructor
@@ -75,7 +78,7 @@ public class SearchController extends Controller {
         this.cache = asyncCacheApi;
         this.profileInfoService = new ProfileInfoService(github);
 
-        this.repoActor = system.actorOf(RepositoryActor.getProps(), "myrepoActor");
+        //this.repoActor = system.actorOf(RepositoryActor.getProps(), "myrepoActor");
 
         //system.actorOf(TimeActor.getProps(), "timeActor");
 
@@ -86,11 +89,14 @@ public class SearchController extends Controller {
     }
 
     public WebSocket ws() {
-        return WebSocket.Json.accept(request -> ActorFlow.actorRef(UserActor::props, actorSystem, materializer));
+        return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
     }
 
     public Result mytestRepo(Http.Request request, String name, String repo){
-        actorSystem.actorSelection("/user/myrepoActor").tell(new RepositoryActor.Tick(name, repo), repoActor);
+        fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
+        repoActor = actorSystem.actorOf(RepositoryActor.getProps(), "myrepoActor_"+fSessionId);
+
+        actorSystem.actorSelection("/user/myrepoActor_"+fSessionId).tell(new RepositoryActor.Tick(name, repo), repoActor);
         return ok(views.html.repo2.render(request));
     }
     /**

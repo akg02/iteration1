@@ -9,20 +9,22 @@ import play.libs.Json;
 
 public class UserActor extends AbstractActor {
     private final ActorRef ws;
+    public String id;
 
-    public UserActor(final ActorRef wsOut) {
+    public UserActor(final ActorRef wsOut, String id) {
         ws =  wsOut;
+        this.id = id;
     }
 
-    static public Props props(final ActorRef wsOut) {
-        return Props.create(UserActor.class, wsOut);
+    static public Props props(final ActorRef wsOut, String id) {
+        return Props.create(UserActor.class, wsOut, id);
     }
 
     @Override
     public void preStart() {
         context().actorSelection("/user/timeActor")
                 .tell(new TimeActor.RegisterMsg(), self());
-        context().actorSelection("/user/myrepoActor")
+        context().actorSelection("/user/myrepoActor_"+id)
                 .tell(new RepositoryActor.RegisterMsg(), self());
     }
 
@@ -33,6 +35,7 @@ public class UserActor extends AbstractActor {
                 .match(RepoMessage.class, this::sendRepoMessage)
                 .build();
     }
+
 
     static public class TimeMessage {
         public final String time;
@@ -66,7 +69,7 @@ public class UserActor extends AbstractActor {
 
     private void sendRepoMessage(RepoMessage rp){
         final ObjectNode response = Json.newObject();
-        //System.out.println(rp.name + "  " + rp.desc);
+        System.out.println(rp.name + "  " + rp.desc);
         response.put("name", rp.name);
         response.put("description", rp.desc);
         response.put("starC", rp.star_count);
