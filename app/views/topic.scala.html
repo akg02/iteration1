@@ -1,6 +1,14 @@
 @import play.mvc.Http.Request
-@(search: SearchResult)
+@(topic: String, request: Request)
 
-@main("Topic: " + search.getInput()) {
-    @listRepositories("Topic", search)
-}
+<html lang="en">
+    @header("Topic: " + topic) {
+    <script type="text/javascript" src='@routes.Assets.versioned("javascripts/list_repositories.js")'></script>
+    <script type="text/javascript" src='@routes.Assets.versioned("javascripts/topic.js")'></script>
+    }
+    @body(routes.SearchController.topicWebSocket.webSocketURL(request)) {
+        <input type="hidden" id="topic" value="@topic">
+        <div class="border" id="results">
+        </div>
+    }
+</html>

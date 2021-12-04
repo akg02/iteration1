@@ -1,0 +1,14 @@
+@(webSocketURL: String)(content: Html)
+
+<body data-ws-url="@webSocketURL">
+<div class="container-fluid">
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand" href="/">
+            <img src='@routes.Assets.versioned("images/git.svg")'
+                 width="30" height="30" class="d-inline-block align-top" alt="">
+            Gitterific
+        </a>
+    </nav>
+    @content
+</div>
+</body>

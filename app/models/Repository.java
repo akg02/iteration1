@@ -1,6 +1,7 @@
 package models;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Hold a repository consisting of name, owner, and list of topics.
@@ -81,6 +82,14 @@ public class Repository {
      */
     public void setTopics(List<String> topics) {
         this.topics = topics;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Repository that = (Repository) o;
+        return Objects.equals(name, that.name)&& Objects.equals(user, that.user) && Objects.equals(topics, that.topics);
     }
 
     /**

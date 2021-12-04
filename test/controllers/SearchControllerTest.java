@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.inject.Inject;
 import com.typesafe.config.Config;
 import models.GithubClient;
@@ -11,18 +12,24 @@ import play.Application;
 import play.cache.AsyncCacheApi;
 import play.inject.Bindings;
 import play.inject.guice.GuiceApplicationBuilder;
+import play.libs.Json;
 import play.libs.ws.WSClient;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.shaded.ahc.org.asynchttpclient.AsyncHttpClient;
+import play.shaded.ahc.org.asynchttpclient.AsyncHttpClientConfig;
+import play.shaded.ahc.org.asynchttpclient.DefaultAsyncHttpClient;
+import play.shaded.ahc.org.asynchttpclient.DefaultAsyncHttpClientConfig;
+import play.shaded.ahc.org.asynchttpclient.netty.ws.NettyWebSocket;
 import play.test.Helpers;
+import play.test.TestServer;
 import play.test.WithApplication;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -66,74 +73,54 @@ public class SearchControllerTest extends WithApplication {
     }
 
     /**
-     * This is to test the empty home page
+     * This is to test the search page
      * @author Hop Nguyen
      */
     @Test
-    public void testEmptyHomePage() {
+    public void testSearchPage() {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(Helpers.GET)
                 .uri("/");
         Result result = Helpers.route(app, request);
         assertEquals(Http.Status.OK, result.status());
-        // Homepage contains a search box (see index.scala.html)
+        // Homepage contains a search box (see search.scala.html)
         assertTrue(Helpers.contentAsString(result)
-                .contains(" <input type=\"text\" class=\"form-control\" placeholder=\"Enter search terms\" id=\"input\" name=\"input\">"));
+                .contains(" <input type=\"text\" class=\"form-control\" placeholder=\"Enter search terms\" id=\"search-input\" name=\"search-input\">"));
         assertTrue(result.session().get(SearchController.SESSION_ID).isPresent());
     }
 
-    /**
-     * This is to test when doing the search without input
-     * @author Hop Nguyen
-     */
-    @Test
-    public void testSearchWithoutInput() {
-        Http.RequestBuilder searchRequest = new Http.RequestBuilder()
-                .method(Helpers.POST)
-                .uri("/search");
-        Result result = Helpers.route(app, searchRequest);
-        // Without input, we just redirect to the index page
-        assertEquals(Http.Status.SEE_OTHER, result.status());
-    }
     /**
      * This is to test the search
      * @author Hop Nguyen
      */
     @Test
-    public void testSearch() {
-        // 1. Create a POST request containing a search query
-        // 2. Execute a search request
-        // 3. Verify a search response is redirected to the index page and contain a SESSION_ID
-        // 4. Create a GET / request with the session id from the response from the search request
-        // 5. Verify that the search history should be returned in the index page
-        Http.RequestBuilder searchRequest = new Http.RequestBuilder()
-                .method(Helpers.POST)
-                .uri("/search")
-                // simulate the search input from the search box
-                .bodyForm(Collections.singletonMap("input", "java programming"))
-                .session(SearchController.SESSION_ID, "session_1");
-        Result searchResult = Helpers.route(app, searchRequest);
-        // once the search action is finished, we redirect to the index page
-        assertEquals(Http.Status.SEE_OTHER, searchResult.status());
-        assertEquals(Optional.of("session_1"), searchResult.session().get(SearchController.SESSION_ID));
+    public void testSearchWebSocket() {
+        TestServer server = Helpers.testServer(app);
+        Helpers.running(server, () -> {
+            AsyncHttpClientConfig config = new DefaultAsyncHttpClientConfig.Builder().setMaxRequestRetry(0).build();
+            try (AsyncHttpClient httpClient = new DefaultAsyncHttpClient(config)) {
+                WebSocketClient webSocketClient = new WebSocketClient(httpClient);
+                List<String> receivedMessages = Collections.synchronizedList(new ArrayList<>());
+                WebSocketClient.LoggingListener listener = new WebSocketClient.LoggingListener(receivedMessages::add);
+                NettyWebSocket webSocket = webSocketClient.call(webSocketURL(server, "/websocket/search"), listener);
 
-        Http.RequestBuilder request = new Http.RequestBuilder()
-                .method(Helpers.GET)
-                .uri("/")
-                .session(SearchController.SESSION_ID, "session_1");
-        Result result = Helpers.route(app, request);
-        assertEquals(Http.Status.OK, result.status());
+                // Await until we receive the response
+                webSocket.sendTextFrame("java programming");
+                await().until(() -> receivedMessages.size() == 1);
 
-        String html = Helpers.contentAsString(result);
-        // Two users
-        assertTrue(html.contains("<a href=\"/profile/hope\">hope</a>"));
-        assertTrue(html.contains("<a href=\"/profile/concordia\">concordia</a>"));
-        // Two repositories
-        assertTrue(html.contains("<a href=\"/repository/hope/java\">java</a>"));
-        assertTrue(html.contains("<a href=\"/repository/concordia/android\">android</a>"));
-        // Two topics
-        assertTrue(html.contains("href=\"/topic/android\""));
-        assertTrue(html.contains("href=\"/topic/security\""));
+                ArrayNode searchHistory = Json.fromJson(Json.parse(receivedMessages.get(0)), ArrayNode.class);
+                assertEquals(1, searchHistory.size());
+                SearchResult searchResult = Json.fromJson(searchHistory.get(0), SearchResult.class);
+                assertEquals("java programming", searchResult.getInput());
+                assertEquals(2, searchResult.getRepositories().size());
+                assertEquals("hope", searchResult.getRepositories().get(0).getUser());
+                assertEquals("java", searchResult.getRepositories().get(0).getName());
+                assertEquals("concordia", searchResult.getRepositories().get(1).getUser());
+                assertEquals("android", searchResult.getRepositories().get(1).getName());
+            } catch (Exception e) {
+                throw new AssertionError(e);
+            }
+        });
     }
 
     /**
@@ -141,22 +128,47 @@ public class SearchControllerTest extends WithApplication {
      * @author Hop Nguyen
      */
     @Test
-    public void testTopic() {
+    public void testTopicPage() {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(Helpers.GET)
                 .uri("/topic/android");
         Result result = Helpers.route(app, request);
         assertEquals(Http.Status.OK, result.status());
-        String html = Helpers.contentAsString(result);
-        // Two users
-        assertTrue(html.contains("<a href=\"/profile/hope\">hope</a>"));
-        assertTrue(html.contains("<a href=\"/profile/concordia\">concordia</a>"));
-        // Two repositories
-        assertTrue(html.contains("<a href=\"/repository/hope/java\">java</a>"));
-        assertTrue(html.contains("<a href=\"/repository/concordia/android\">android</a>"));
-        // Two topics
-        assertTrue(html.contains("href=\"/topic/android\""));
-        assertTrue(html.contains("href=\"/topic/security\""));
+    }
+
+    /**
+     * @author Hop Nguyen
+     */
+    @Test
+    public void testTopicWebSocket() {
+        TestServer server = Helpers.testServer(app);
+        Helpers.running(server, () -> {
+            AsyncHttpClientConfig config = new DefaultAsyncHttpClientConfig.Builder().setMaxRequestRetry(0).build();
+            try (AsyncHttpClient httpClient = new DefaultAsyncHttpClient(config)) {
+                WebSocketClient webSocketClient = new WebSocketClient(httpClient);
+                List<String> receivedMessages = Collections.synchronizedList(new ArrayList<>());
+                WebSocketClient.LoggingListener listener = new WebSocketClient.LoggingListener(receivedMessages::add);
+                NettyWebSocket webSocket = webSocketClient.call(webSocketURL(server, "/websocket/topic"), listener);
+                // Await until the web socket is connected
+                await().until(webSocket::isOpen);
+                webSocket.sendTextFrame("android");
+                // Await until we receive the response
+                await().until(() -> receivedMessages.size() > 0);
+                SearchResult searchResult = Json.fromJson(Json.parse(receivedMessages.get(0)), SearchResult.class);
+                assertEquals("android", searchResult.getInput());
+                assertEquals(2, searchResult.getRepositories().size());
+                assertEquals("hope", searchResult.getRepositories().get(0).getUser());
+                assertEquals("java", searchResult.getRepositories().get(0).getName());
+                assertEquals("concordia", searchResult.getRepositories().get(1).getUser());
+                assertEquals("android", searchResult.getRepositories().get(1).getName());
+            } catch (Exception e) {
+                throw new AssertionError(e);
+            }
+        });
+    }
+
+    private String webSocketURL(TestServer server, String endpoint) {
+        return "ws://localhost:" + server.getRunningHttpPort().getAsInt() + endpoint;
     }
 
     /**

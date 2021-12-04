@@ -1,10 +1,10 @@
 package models;
 
 import org.junit.Test;
+import services.HistoryService;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -20,8 +20,10 @@ public class SearchHistoryTest {
      */
     @Test
     public void testHistory() {
-        SearchHistory searchHistory = new SearchHistory();
-        assertTrue(searchHistory.getHistory("session_1").isEmpty());
+        HistoryService historyService = new HistoryService();
+        SearchHistory history = historyService.getHistory("session_1");
+        assertTrue(history.getResults().isEmpty());
+        assertTrue(history.getQueries().isEmpty());
 
         // Add up to 10 items
         for (int i = 1; i <= 10; i++) {
@@ -30,11 +32,10 @@ public class SearchHistoryTest {
             String repo = "repo-" + i;
             SearchResult result = new SearchResult(query,
                     Arrays.asList(new Repository(user, repo, Collections.emptyList())));
-            searchHistory.addToHistory("session_1", result);
-            List<SearchResult> history = searchHistory.getHistory("session_1");
-            assertEquals(i, history.size());
+            history.addToHistory(result);
+            assertEquals(i, history.getResults().size());
         }
-        assertEquals(10, searchHistory.getHistory("session_1").size());
+        assertEquals(10, historyService.getHistory("session_1").getResults().size());
 
         // Add more items should discard old items
         for (int i = 1; i <= 10; i++) {
@@ -43,11 +44,10 @@ public class SearchHistoryTest {
             String repo = "repo-" + i;
             SearchResult result = new SearchResult(query,
                     Arrays.asList(new Repository(user, repo, Collections.emptyList())));
-            searchHistory.addToHistory("session_1", result);
-            List<SearchResult> history = searchHistory.getHistory("session_1");
-            assertEquals(10, history.size());
+            history.addToHistory(result);
+            assertEquals(10, history.getResults().size());
         }
-        assertEquals(10, searchHistory.getHistory("session_1").size());
-        assertTrue(searchHistory.getHistory("session_2").isEmpty());
+        assertEquals(10, historyService.getHistory("session_1").getResults().size());
+        assertTrue(historyService.getHistory("session_2").getResults().isEmpty());
     }
 }

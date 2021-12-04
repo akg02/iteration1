@@ -7,11 +7,8 @@ import akka.stream.Materializer;
 import com.google.inject.Inject;
 import models.GithubClient;
 import models.SearchHistory;
-import models.SearchResult;
 import play.cache.AsyncCacheApi;
-import play.data.Form;
-import play.data.FormFactory;
-import play.i18n.MessagesApi;
+import services.HistoryService;
 import play.libs.streams.ActorFlow;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -23,8 +20,8 @@ import services.ProfileInfoService;
 import services.RepositoryProfileService;
 import views.html.repository;
 
-import java.util.List;
 import java.util.UUID;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -36,23 +33,17 @@ public class SearchController extends Controller {
     public static final String SESSION_ID = "session_id";
 
     private final GithubClient github;
-    private final Form<SearchForm> searchForm;
-    private final MessagesApi messagesApi;
-    private final SearchHistory searchHistory;
+    private final HistoryService historyService;
     private final IssueService issueService;
 
     private final CommitService commitService;
     private final RepositoryProfileService repositoryProfileService;
     private final ProfileInfoService profileInfoService;
 
-    private AsyncCacheApi cache;
-    
+    private final AsyncCacheApi cache;
+    private final ActorSystem actorSystem;
+    private final Materializer materializer;
 
-    @Inject
-    ActorSystem actorSystem;
-
-    @Inject
-    Materializer materializer;
 
     private ActorRef commitActor;
     private ActorRef repoActor;
@@ -63,17 +54,16 @@ public class SearchController extends Controller {
      * @author Hop Nguyen
      */
     @Inject
-    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi, ActorSystem actorSystem) {
+    public SearchController(GithubClient github, AsyncCacheApi asyncCacheApi, ActorSystem actorSystem, Materializer materializer) {
         this.github = github;
-        this.searchForm = formFactory.form(SearchForm.class);
-        this.messagesApi = messagesApi;
-        this.searchHistory = new SearchHistory();
+        this.cache = asyncCacheApi;
+        this.actorSystem = actorSystem;
+        this.materializer = materializer;
+        this.historyService = new HistoryService();
         this.issueService  = new IssueService(github);
         this.commitService = new CommitService(github);
         this.repositoryProfileService = new RepositoryProfileService(github);
-        this.cache = asyncCacheApi;
         this.profileInfoService = new ProfileInfoService(github);
-        this.actorSystem = actorSystem;
 
         this.commitActor = actorSystem.actorOf(CommitActor.props(), "commitActor");
         actorSystem.actorOf(TimeActor.props(), "timeActor");
@@ -102,38 +92,37 @@ public class SearchController extends Controller {
      * The homepage which displays the search history of the current session
      * @author Hop Nguyen
      */
-    public CompletionStage<Result> index(Http.Request request) {
+    public CompletionStage<Result> search(Http.Request request) {
         String sessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
-        List<SearchResult> searchResults = searchHistory.getHistory(sessionId);
         return CompletableFuture.completedFuture(
-                ok(views.html.index.render(searchResults, searchForm, request, messagesApi.preferred(request)))
-                        .addingToSession(request, SESSION_ID, sessionId));
+                ok(views.html.search.render(request)).addingToSession(request, SESSION_ID, sessionId));
     }
 
-    /**
-     * An endpoint that performs a search and adds the result to the history for the current session
-     * @author Hop Nguyen
-     */
-    public CompletionStage<Result> search(Http.Request request) {
-        Form<SearchForm> boundForm = searchForm.bindFromRequest(request);
-        if (boundForm.hasErrors()) {
-            return CompletableFuture.completedFuture(redirect(routes.SearchController.index()));
-        } else {
-            String searchInput = boundForm.get().getInput();
+    public WebSocket searchWebSocket() {
+        return WebSocket.Text.accept(request -> {
             String sessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
-            return github.searchRepositories(searchInput, false)
-                    .thenAccept(searchResult -> searchHistory.addToHistory(sessionId, searchResult))
-                    .thenApplyAsync(nullResult -> redirect(routes.SearchController.index())
-                            .addingToSession(request, SESSION_ID, sessionId));
-        }
+            SearchHistory searchHistory = historyService.getHistory(sessionId);
+            return ActorFlow.actorRef(
+                    out -> SearchActor.props(actorSystem, Duration.ofSeconds(10), out, github, searchHistory),
+                    actorSystem,
+                    materializer);
+        });
     }
 
     /**
      * Route for topic
      * @author Hop Nguyen
      */
-    public CompletionStage<Result> topic(String topic) {
-        return github.searchRepositories(topic, true).thenApplyAsync(rs -> ok(views.html.topic.render(rs)));
+    public CompletionStage<Result> topic(String topic, Http.Request request) {
+        return CompletableFuture.completedFuture(ok(views.html.topic.render(topic, request)));
+    }
+
+    public WebSocket topicWebSocket() {
+        return WebSocket.Text.accept(request ->
+                ActorFlow.actorRef(
+                        out -> TopicActor.props(actorSystem, Duration.ofSeconds(5), out, github),
+                        actorSystem,
+                        materializer));
     }
 
     /**
@@ -209,11 +198,11 @@ public class SearchController extends Controller {
     public WebSocket issueStatisticsSocket() {
     	return WebSocket.Json.accept(request -> ActorFlow.actorRef(f->UserActor.props(f, fSessionId), actorSystem, materializer));
     }
-    
+
     public Result issueStatisticsPage(Http.Request request,String name, String repo) {
         fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
         issueStatisticsActor = actorSystem.actorOf(IssueStatisticsActor.props(),"issueStatisticsActor"+fSessionId);
-        
+
         actorSystem.actorSelection("/user/issueStatisticsActor"+fSessionId).tell(new IssueStatisticsActor.Tick(name, repo),issueStatisticsActor);
         return ok(views.html.issueActor.render(request));
 

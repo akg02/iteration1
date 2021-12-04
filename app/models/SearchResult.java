@@ -1,5 +1,6 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
 import java.util.List;
@@ -59,6 +60,7 @@ public class SearchResult {
      * @return the repository list
      * @author Hop Nguyen
      */
+    @JsonGetter("items")
     public List<Repository> getRepositories() {
         return repositories;
     }
