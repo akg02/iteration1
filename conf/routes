@@ -1,6 +1,6 @@
 GET    /                            controllers.SearchController.index(request: Request)
 GET    /commitSocket/:user/:repo          controllers.SearchController.commitSocketPage(request: Request, user: String, repo: String)
-
+GET	   /issueStatisticsSocket/:user/:repo controllers.SearchController.issueStatisticsPage(request: Request, user: String, repo: String)
 POST   /search                      controllers.SearchController.search(request: Request)
 
 GET    /topic/:topic                controllers.SearchController.topic(topic: String)
@@ -15,6 +15,7 @@ GET    /issueStatistics/:user/:repo			controllers.SearchController.issueStatisti
 GET    /commits/:user/:repo         controllers.SearchController.commits(user: String, repo: String, request: Request)
 
 GET     /commitSocket                         controllers.SearchController.commitSocket
+GET		/issueStatisticsSocket		controllers.SearchController.issueStatisticsSocket
 
 GET     /timer                      controllers.SearchController.timeMe(request: Request)
 
