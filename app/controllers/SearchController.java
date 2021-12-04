@@ -2,9 +2,20 @@ package controllers;
 
 import com.google.inject.Inject;
 
+import actors.RepositoryActor;
+import actors.TimeActor;
+import actors.UserActor;
+import actors.CommitActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.stream.Materializer;
+import com.google.inject.Inject;
+
+import com.typesafe.sslconfig.ssl.FakeChainedKeyStore;
 import models.GithubClient;
 import models.SearchHistory;
 import models.SearchResult;
+import play.libs.streams.ActorFlow;
 import play.cache.AsyncCacheApi;
 import play.data.Form;
 import play.data.FormFactory;
@@ -12,9 +23,11 @@ import play.i18n.MessagesApi;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.mvc.WebSocket;
 import services.CommitService;
 import services.IssueService;
 import services.RepositoryProfileService;
+import views.html.actor;
 import views.html.repository;
 import services.ProfileInfoService;
 
@@ -43,11 +56,21 @@ public class SearchController extends Controller {
     private AsyncCacheApi cache;
     
 
+    @Inject
+    ActorSystem actorSystem;
+
+    @Inject
+    Materializer materializer;
+
+    private ActorRef commitActor;
+    private ActorRef repoActor;
+    public String fSessionId;
+
     /** The SearchController constructor
      * @author Hop Nguyen
      */
     @Inject
-    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi) {
+    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi, ActorSystem actorSystem) {
         this.github = github;
         this.searchForm = formFactory.form(SearchForm.class);
         this.messagesApi = messagesApi;
@@ -57,9 +80,31 @@ public class SearchController extends Controller {
         this.repositoryProfileService = new RepositoryProfileService(github);
         this.cache = asyncCacheApi;
         this.profileInfoService = new ProfileInfoService(github);
+        this.actorSystem = actorSystem;
+
+        this.commitActor = actorSystem.actorOf(CommitActor.props(), "commitActor");
+        actorSystem.actorOf(TimeActor.props(), "timeActor");
+        //this.repoActor = system.actorOf(RepositoryActor.getProps(), "myrepoActor");
+
+        //system.actorOf(TimeActor.getProps(), "timeActor");
 
     }
 
+    public Result timeMe(Http.Request request) {
+        return ok(views.html.timer.render(request));
+    }
+
+    public WebSocket ws() {
+        return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
+    }
+
+    public Result mytestRepo(Http.Request request, String name, String repo){
+        fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
+        repoActor = actorSystem.actorOf(RepositoryActor.getProps(), "myrepoActor_"+fSessionId);
+
+        actorSystem.actorSelection("/user/myrepoActor_"+fSessionId).tell(new RepositoryActor.Tick(name, repo), repoActor);
+        return ok(views.html.repo2.render(request));
+    }
     /**
      * The homepage which displays the search history of the current session
      * @author Hop Nguyen
@@ -98,18 +143,18 @@ public class SearchController extends Controller {
         return github.searchRepositories(topic, true).thenApplyAsync(rs -> ok(views.html.topic.render(rs)));
     }
 
-   /**
-    * Controller Method for api: /profile/:user
-    * displays details of the users public profile page and hyperlinks to repositories
-    * @author Joon Seung Hwang
-    * @param user username of github
-    * @return user profile page
-    */
+    /**
+     * Controller Method for api: /profile/:user
+     * displays details of the users public profile page and hyperlinks to repositories
+     * @author Joon Seung Hwang
+     * @param user username of github
+     * @return user profile page
+     */
     public CompletionStage<Result> profile(String user) {
         CompletionStage<Result> cache = this.cache
-        		.getOrElseUpdate("repository." + user, () -> profileInfoService.getRepoList(user)
-        				.thenApply(r -> ok(views.html.profile.render(r))));
-        return cache;        
+                .getOrElseUpdate("repository." + user, () -> profileInfoService.getRepoList(user)
+                        .thenApply(r -> ok(views.html.profile.render(r))));
+        return cache;
     }
 
     /**
@@ -127,21 +172,21 @@ public class SearchController extends Controller {
     }
 
     /**
-     * 
+     *
      * Controller Method for api : /issueStatistics
      * @author Meet Mehta
      * @param user username of github repository
      * @param repo repository name
-     * @param request Http.Request 
-     * @return page displaying word count of issues title in descending order. 
+     * @param request Http.Request
+     * @return page displaying word count of issues title in descending order.
      */
-  
+
     public CompletionStage<Result> issueStatistics(String user, String repo,Http.Request request){
-    	CompletionStage<Result> result = this.cache.getOrElseUpdate("issueStat."+user+"."+repo,()->issueService.getIssueStatistics(user, repo).thenApplyAsync(
-    			op -> ok(views.html.issuesStatistics.render(op, request)).withHeader(CACHE_CONTROL, "max-age=3600")));
-    	 
-    			
-    	return result;
+        CompletionStage<Result> result = this.cache.getOrElseUpdate("issueStat."+user+"."+repo,()->issueService.getIssueStatistics(user, repo).thenApplyAsync(
+                op -> ok(views.html.issuesStatistics.render(op, request)).withHeader(CACHE_CONTROL, "max-age=3600")));
+
+
+        return result;
     }
 
 
@@ -163,4 +208,17 @@ public class SearchController extends Controller {
 
         return resultCompletionStage;
     }
+
+    public WebSocket commitSocket(){
+        return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
+    }
+
+    public Result commitSocketPage(Http.Request request, String name, String repo){
+        fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
+        commitActor = actorSystem.actorOf(CommitActor.props(), "commitActor"+fSessionId);
+
+        actorSystem.actorSelection("/user/commitActor"+fSessionId).tell(new CommitActor.Tick(name, repo), commitActor);
+        return ok(views.html.actor.render(request));
+    }
+
 }

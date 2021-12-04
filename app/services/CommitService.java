@@ -1,6 +1,7 @@
 package services;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import models.CommitStats;
 import models.Commits;
 import models.GithubClient;
@@ -16,13 +17,20 @@ import java.util.stream.Collectors;
  *
  * @author Smit Parmar
  */
+@Singleton
 public class CommitService {
-    private final GithubClient github;
+    private static GithubClient github = null;
 
     /**
      * This is a Parameterised Constructor
      * @param github object of GithubClient by using which we are making API calls
      */
+    private static final CommitService instance = new CommitService(github);
+
+    public static CommitService getInstance() {
+        return instance;
+    }
+
     @Inject
     public CommitService(GithubClient github) {
         this.github = github;
@@ -35,9 +43,10 @@ public class CommitService {
      * @param repo repository name
      * @return List of maps which contains of all statistical data shown in the page
      */
-    public CompletionStage<List<Map<String, Integer>>> getCommitStats(String user, String repo) {
+    public CompletionStage<ArrayList<Map<String, Integer>>> getCommitStats(String user, String repo) {
         try{
-            ArrayList<String> commitIdList = github.getAllCommitList(user, repo, 100);
+
+            ArrayList<String> commitIdList = github.getAllCommitList(user, repo, 5);
             ArrayList<CommitStats> commitStatsList = github.getCommitStatFromList(user, repo, commitIdList);
 
             return CompletableFuture.supplyAsync( () -> {
@@ -96,7 +105,7 @@ public class CommitService {
                         .limit(10)
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
 
-                List<Map<String, Integer>> resultList = new ArrayList<>();
+                ArrayList<Map<String, Integer>> resultList = new ArrayList<>();
                 HashMap<String, Integer> maxAllCommitAddition = new HashMap<String, Integer>() {{
                     put("maxAddition", allMaxAdditionCommit);
                 }};

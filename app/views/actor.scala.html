@@ -1,0 +1,22 @@
+@(request: play.mvc.Http.Request)
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <script type='text/javascript' src='https://code.jquery.com/jquery-3.3.1.min.js'></script>
+    <script type='text/javascript' src='@routes.Assets.versioned("javascripts/commitScript.js")'></script>
+</head>
+<body data-ws-url="@routes.SearchController.commitSocket.webSocketURL(request)">
+<h1>Commit Details</h1>
+<b>Max Addition</b> <div id="maxAddition"> </div>
+<b>Min Addition</b> <div id="minAddition"> </div>
+<b>Avg Addition</b> <div id="avgAddition"> </div>
+<b>Max Deletion</b> <div id="maxDeletion"> </div>
+<b>Min Deletion</b> <div id="minDeletion"> </div>
+<b>Avg Deletion</b> <div id="avgDeletion"> </div>
+
+<h1>Top 10 committers</h1>
+<div id="top10committers"></div>
+</body>
+</html>
