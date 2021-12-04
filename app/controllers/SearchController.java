@@ -2,6 +2,15 @@ package controllers;
 
 import com.google.inject.Inject;
 
+import actors.RepositoryActor;
+import actors.TimeActor;
+import actors.UserActor;
+import actors.CommitActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.stream.Materializer;
+import com.google.inject.Inject;
+
 import com.typesafe.sslconfig.ssl.FakeChainedKeyStore;
 import models.GithubClient;
 import models.SearchHistory;
@@ -54,13 +63,14 @@ public class SearchController extends Controller {
     Materializer materializer;
 
     private ActorRef commitActor;
+    private ActorRef repoActor;
     public String fSessionId;
 
     /** The SearchController constructor
      * @author Hop Nguyen
      */
     @Inject
-    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi) {
+    public SearchController(GithubClient github, FormFactory formFactory, MessagesApi messagesApi, AsyncCacheApi asyncCacheApi, ActorSystem actorSystem) {
         this.github = github;
         this.searchForm = formFactory.form(SearchForm.class);
         this.messagesApi = messagesApi;

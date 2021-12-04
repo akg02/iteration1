@@ -3,6 +3,7 @@ package actors;
 import akka.actor.AbstractActorWithTimers;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import play.Logger;
 import scala.concurrent.duration.Duration;
 import services.RepositoryProfileService;
 
@@ -43,6 +44,7 @@ public class RepositoryActor extends AbstractActorWithTimers {
 
     @Override
     public void preStart() {
+        Logger.info("RepoActor {} started", self());
         //getTimers().startPeriodicTimer("Timer", new Tick("a", "a"), Duration.create(5, TimeUnit.SECONDS));
     }
 

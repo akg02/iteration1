@@ -6,7 +6,7 @@ import akka.actor.Props;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.Logger;
 import play.libs.Json;
-
+import models.*;
 import java.util.*;
 
 public class UserActor extends AbstractActor {
@@ -25,8 +25,8 @@ public class UserActor extends AbstractActor {
 
     @Override
     public void preStart() throws Exception {
-        context().actorSelection("/user/timeActor")
-                .tell(new TimeActor.RegisterMsg(), self());
+//        context().actorSelection("/user/timeActor")
+//                .tell(new TimeActor.RegisterMsg(), self());
         context().actorSelection("/user/commitActor"+id)
                 .tell(new CommitActor.RegisterMsg(), self());
         context().actorSelection("/user/myrepoActor_"+id)
@@ -58,11 +58,8 @@ public class UserActor extends AbstractActor {
         response.put("maxDeletion", msg.list.get(3).get("maxDeletion"));
         response.put("minDeletion", msg.list.get(4).get("minDeletion"));
         response.put("avgDeletion", msg.list.get(5).get("avgDeletion"));
-        String top10Committers="";
-        String top10Counts="";
 
         response.put("topCommitters", msg.list.get(6).toString());
-        response.put("counts", top10Counts);
 //        response.put("list", msg.list.toString());
         ws.tell(response, self());
     }
