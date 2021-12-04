@@ -14,4 +14,5 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-core" % "4.0.0" % "test",
   caffeine,
   "javax.xml.bind" % "jaxb-api" % "2.3.1",
+  "com.typesafe.akka" %% "akka-testkit" % "2.6.10" % Test
 )
