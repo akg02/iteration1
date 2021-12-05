@@ -1,8 +1,5 @@
 package actors;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
 import akka.actor.AbstractActorWithTimers;
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -10,6 +7,10 @@ import com.google.inject.Inject;
 import play.Logger;
 import scala.concurrent.duration.Duration;
 import services.CommitService;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class CommitActor extends AbstractActorWithTimers {
 
@@ -59,6 +60,14 @@ public class CommitActor extends AbstractActorWithTimers {
                     notifyClients(msg.name, msg.repo);
                 })
                 .match(RegisterMsg.class, msg -> userActors.add(sender()))
+                .match(String.class, msg -> {
+                    System.out.println("inside here");
+                    System.out.println(userActors);
+                    userActors.forEach(u -> {
+                        System.out.println(u.toString());
+                        u.tell("{\"list\":[]}",u);
+                    });
+                })
                 .build();
     }
 
