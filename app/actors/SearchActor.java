@@ -43,7 +43,7 @@ public class SearchActor extends ActorWithRefresh {
     }
 
     private void replyLatestResults() {
-        if (lastSentVersion != history.getVersion()) {
+        if (lastSentVersion < history.getVersion()) {
             lastSentVersion = history.getVersion();
             log.info("search results have updated to version {}", lastSentVersion);
             out.tell(history.toJson(), self());
