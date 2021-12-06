@@ -49,7 +49,7 @@ public class RepositoryActor extends AbstractActorWithTimers {
     }
 
     public void fiveSecondRefresh(String name, String repo){
-        getTimers().startPeriodicTimer("RepoTimer", new Tick(name, repo), Duration.create(5, TimeUnit.SECONDS));
+        getTimers().startPeriodicTimer("RepoTimer", new Tick(name, repo), Duration.create(300, TimeUnit.SECONDS));
     }
 
 
