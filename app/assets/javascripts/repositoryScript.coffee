@@ -35,7 +35,8 @@ $ ->
       for i in issueList2
         il = i.split(",")
         for j in il
-          $('#issues').append j
+          $('#issues').append j + "<br/>"
+        $('#issues'). append +"<br/>"
     else
       $('#issues').html("No Issues")
 
