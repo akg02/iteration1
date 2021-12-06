@@ -1,0 +1,31 @@
+@(request: play.mvc.Http.Request, user: String, rname: String)
+
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+  <title>Repository Profile</title>
+  <script type='text/javascript' src='https://code.jquery.com/jquery-3.3.1.min.js'></script>
+  <script type='text/javascript' src='@routes.Assets.versioned("javascripts/repositoryScript.js")'></script>
+</head>
+<body data-ws-url="@routes.SearchController.repositorySocket.webSocketURL(request)">
+<h1>Repository profile details</h1>
+<strong>Name : </strong><div id="name"> </div> <br/>
+
+<strong>User : </strong> <a href="/profile/@user">@user</a> <br/>
+
+<strong>Description : </strong><div id="desc"> </div> <br/>
+
+<strong>Created At : </strong><div id="createAt"> </div> <br/>
+
+<strong>Last Updated on : </strong><div id="lastupdate"> </div> <br/>
+
+<strong>Stars : </strong><div id="stars"> </div> <br/>
+
+<strong>Forks : </strong><div id="forks"> </div> <br/>
+
+<strong>Topics : </strong><div id="topics"> </div> <br/> <br/>
+
+<strong><a href="/commitSocket/@user/@rname">Commits </a></strong> <br/> <br/>
+
+<strong><a href="/issueStatisticsSocket/@user/@rname">Issues </a></strong> <div id="issues"> </div> <br/> <br/>
+</body>
+</html>
