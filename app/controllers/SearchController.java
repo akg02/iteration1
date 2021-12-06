@@ -212,16 +212,16 @@ public class SearchController extends Controller {
     /**
      * @author Sagar Sanghani
      * @param request
-     * @param name
+     * @param user
      * @param repo
      * @return
      */
 
-    public Result repositorySocketPage(Http.Request request, String name, String repo){
+    public Result repositorySocketPage(Http.Request request, String user, String repo){
         fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
         repoActor = actorSystem.actorOf(RepositoryActor.getProps(), "RepoActor_"+fSessionId);
-        actorSystem.actorSelection("/user/RepoActor_"+fSessionId).tell(new RepositoryActor.Tick(name, repo), repoActor);
-        return ok(views.html.repositoryActor.render(request));
+        actorSystem.actorSelection("/user/RepoActor_"+fSessionId).tell(new RepositoryActor.Tick(user, repo), repoActor);
+        return ok(views.html.repositoryActor.render(request, user, repo));
     }
 
 }

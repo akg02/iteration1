@@ -11,7 +11,7 @@ GET    /profile/:user               controllers.SearchController.profile(user: S
 
 GET    /repository/:user/:repo      controllers.SearchController.repository(user: String, repo: String)
 GET    /repoSocket/:user/:repo          controllers.SearchController.repositorySocketPage(request: Request, user: String, repo: String)
-GET    /websocket/repository             controllers.SearchController.repositorySocket
+GET    /repoWebSocket            controllers.SearchController.repositorySocket
 
 
 GET    /issueStatistics/:user/:repo			controllers.SearchController.issueStatistics(user: String, repo: String, request:Request)
@@ -22,6 +22,5 @@ GET     /commitSocket                         controllers.SearchController.commi
 GET		/issueStatisticsSocket		controllers.SearchController.issueStatisticsSocket
 
 
-GET     /ws                         controllers.SearchController.ws
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
