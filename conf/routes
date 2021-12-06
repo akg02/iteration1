@@ -8,6 +8,8 @@ GET    /commitSocket/:user/:repo          controllers.SearchController.commitSoc
 GET	   /issueStatisticsSocket/:user/:repo controllers.SearchController.issueStatisticsPage(request: Request, user: String, repo: String)
 
 GET    /profile/:user               controllers.SearchController.profile(user: String)
+GET    /profileSocket/:user         controllers.SearchController.profileSocketPage(request: Request, user: String)
+GET    /profileWebSocket            controllers.SearchController.profileSocket
 
 GET    /repository/:user/:repo      controllers.SearchController.repository(user: String, repo: String)
 GET    /repoSocket/:user/:repo          controllers.SearchController.repositorySocketPage(request: Request, user: String, repo: String)

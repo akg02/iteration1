@@ -1,0 +1,34 @@
+@(request: play.mvc.Http.Request, user: String)
+
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+  <title>User Profile</title>
+  <script type='text/javascript' src='https://code.jquery.com/jquery-3.3.1.min.js'></script>
+  <script type='text/javascript' src='@routes.Assets.versioned("javascripts/profileScript.js")'></script>
+</head>
+<body data-ws-url="@routes.SearchController.profileSocket.webSocketURL(request)">
+<h1>User profile details</h1>
+<Strong>Profile page : </Strong> <a href="https://github.com/@user">@user</a> <br/>
+
+<strong>Name : </strong><div id="name"> </div> <br/>
+
+<strong>Company : </strong><div id="company"> </div> <br/>
+
+<strong>Blog : </strong><div id="blog"> </div> <br/>
+
+<strong>Location: </strong><div id="location"> </div> <br/>
+
+<strong>Email : </strong><div id="email"> </div> <br/>
+
+<strong>Bio : </strong><div id="bio"> </div> <br/>
+
+<strong>Twitter : </strong><div id="twitter_username"> </div> <br/>
+
+<strong>Followers : </strong><div id="followers"> </div> <br/>
+
+<strong>Following : </strong><div id="following"> </div> <br/>
+
+<strong>Repository : </strong><div id="repository"> </div> <br/> <br/>
+
+</body>
+</html>

@@ -49,6 +49,7 @@ public class SearchController extends Controller {
     private ActorRef repoActor;
     private ActorRef issueStatisticsActor;
     public String fSessionId;
+    private ActorRef userProfileActor;
 
     /** The SearchController constructor
      * @author Hop Nguyen
@@ -222,6 +223,23 @@ public class SearchController extends Controller {
         repoActor = actorSystem.actorOf(RepositoryActor.getProps(), "RepoActor_"+fSessionId);
         actorSystem.actorSelection("/user/RepoActor_"+fSessionId).tell(new RepositoryActor.Tick(user, repo), repoActor);
         return ok(views.html.repositoryActor.render(request, user, repo));
+    }
+    
+    public WebSocket profileSocket() {
+    	return WebSocket.Json.accept(request -> 
+    			ActorFlow.actorRef(
+    					f -> UserActor.props(f, fSessionId), 
+    					actorSystem, 
+    					materializer));
+    }
+    
+    public Result profileSocketPage(Http.Request request, String user) {
+    	fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
+    	userProfileActor = actorSystem.actorOf(UserProfileActor.getProps(), "userProfileActor" + fSessionId);
+    	actorSystem.actorSelection("/user/userProfileActor"+fSessionId).tell(new UserProfileActor.Tick(user), userProfileActor);
+    	return ok(views.html.profileActor.render(request, user));
+    	
+    	
     }
 
 }

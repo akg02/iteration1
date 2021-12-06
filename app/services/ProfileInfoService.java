@@ -1,16 +1,11 @@
 package services;
 
 import models.GithubClient;
-import models.Repository;
 import models.ProfileInfo;
 
 import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Service file to obtain public details of a github user
@@ -20,8 +15,9 @@ import java.util.concurrent.CompletableFuture;
  *
  */
 public class ProfileInfoService {
-	private final GithubClient github;
-    private final Map<String, ProfileInfo> info;
+	private static GithubClient github = null;
+    //private final Map<String, ProfileInfo> info;
+    private static final ProfileInfoService instance = new ProfileInfoService(github);
 
     /**
      * Parmeterized Constructor
@@ -29,7 +25,7 @@ public class ProfileInfoService {
      */
     @Inject
     public ProfileInfoService(GithubClient github){
-        this.info = new HashMap<>();
+        //this.info = new HashMap<>();
         this.github = github;
     }
 
@@ -47,6 +43,10 @@ public class ProfileInfoService {
     			.thenCompose(i2 -> github.displayUserProfile(user, i2));
     			
         return pInfo;
+    }
+    
+    public static ProfileInfoService getInstance() {
+    	return instance;
     }
 
 }

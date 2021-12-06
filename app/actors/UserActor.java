@@ -6,6 +6,7 @@ import akka.actor.Props;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.Logger;
 import play.libs.Json;
+//import sun.java2d.cmm.ProfileDeferralInfo;
 import models.*;
 import java.util.*;
 
@@ -32,6 +33,8 @@ public class UserActor extends AbstractActor {
         context().actorSelection("/user/RepoActor_"+id)
                 .tell(new RepositoryActor.RegisterMsg(), self());
         context().actorSelection("/user/issueStatisticsActor"+id).tell(new IssueStatisticsActor.RegisterMsg(), self());
+        context().actorSelection("/user/userProfileActor_"+id)
+        		.tell(new UserProfileActor.RegisterMsg(), self());
 
     }
 
@@ -42,6 +45,7 @@ public class UserActor extends AbstractActor {
                 .match(CommitMessage.class, this::sendCommitMessage)
                 .match(RepoMessage.class, this::sendRepoMessage)
                 .match(IssueStatisticsMessage.class, this::sendIssueStatisticsMessage)
+                .match(ProfileMessage.class, this::sendProfileMessage)
                 .build();
     }
 
@@ -128,5 +132,31 @@ public class UserActor extends AbstractActor {
         response.put("issueList", tempIL.toString());
         ws.tell(response, self());
 
+    }
+    
+    static public class ProfileMessage {
+    	public final ProfileInfo profInfo;
+    	
+    	public ProfileMessage(ProfileInfo profInfo) {
+    		this.profInfo = profInfo;
+    	}
+    }
+    
+    private void sendProfileMessage(ProfileMessage msg) {
+    	final ObjectNode response = Json.newObject();
+    	response.put("id", msg.profInfo.getLogin());
+    	response.put("name", msg.profInfo.getName());
+    	response.put("company", msg.profInfo.getCompany());
+    	response.put("blog", msg.profInfo.getBlog());
+    	response.put("location", msg.profInfo.getLocation());
+    	response.put("email", msg.profInfo.getEmail());
+    	response.put("bio", msg.profInfo.getBio());
+    	response.put("twitter_username", msg.profInfo.getTwitter());
+    	response.put("followers", msg.profInfo.getFollowers());
+    	response.put("following", msg.profInfo.getFollowing());
+    	response.put("repository", msg.profInfo.getRepos().toString());
+    	
+    	ws.tell(response, self());
+    	
     }
 }
