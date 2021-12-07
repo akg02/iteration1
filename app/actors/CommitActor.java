@@ -44,11 +44,11 @@ public class CommitActor extends AbstractActorWithTimers {
     @Override
     public void preStart() {
         Logger.info("CommitActor {} started", self());
-        //getTimers().startPeriodicTimer("Timer", new Tick("a", "a"), Duration.create(5, TimeUnit.SECONDS));
+//        getTimers().startPeriodicTimer("Timer", new Tick(userName, repoName), Duration.create(5, TimeUnit.SECONDS));
     }
 
     public void fiveSecondRefresh(String name, String repo){
-        getTimers().startPeriodicTimer("commitActor", new Tick(name, repo), Duration.create(15, TimeUnit.SECONDS));
+        getTimers().startPeriodicTimer("commitActor", new Tick(name, repo), Duration.create(5, TimeUnit.SECONDS));
     }
 
 

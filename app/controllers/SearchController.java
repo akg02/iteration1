@@ -48,6 +48,7 @@ public class SearchController extends Controller {
     private ActorRef commitActor;
     private ActorRef repoActor;
     private ActorRef issueStatisticsActor;
+    private ActorRef userProfileActor;
     public String fSessionId;
 
     /** The SearchController constructor
@@ -167,7 +168,6 @@ public class SearchController extends Controller {
         CompletionStage<Result> result = this.cache.getOrElseUpdate("issueStat."+user+"."+repo,()->issueService.getIssueStatistics(user, repo).thenApplyAsync(
                 op -> ok(views.html.issuesStatistics.render(op, request)).withHeader(CACHE_CONTROL, "max-age=3600")));
 
-
         return result;
     }
 
@@ -195,6 +195,10 @@ public class SearchController extends Controller {
         return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
     }
 
+    public WebSocket userDataSocket(){
+        return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
+    }
+
     public WebSocket issueStatisticsSocket() {
     	return WebSocket.Json.accept(request -> ActorFlow.actorRef(f->UserActor.props(f, fSessionId), actorSystem, materializer));
     }
@@ -205,16 +209,23 @@ public class SearchController extends Controller {
 
         actorSystem.actorSelection("/user/issueStatisticsActor"+fSessionId).tell(new IssueStatisticsActor.Tick(name, repo),issueStatisticsActor);
         return ok(views.html.issueActor.render(request));
-
     }
+
+
     public Result commitSocketPage(Http.Request request, String name, String repo){
         fSessionId = UUID.randomUUID().toString();
         commitActor = actorSystem.actorOf(CommitActor.props(), "commitActor"+fSessionId);
-        issueStatisticsActor = actorSystem.actorOf(IssueStatisticsActor.props(), "issueStatisticsActor"+fSessionId);
 
         actorSystem.actorSelection("/user/commitActor"+fSessionId).tell(new CommitActor.Tick(name, repo), commitActor);
-//        actorSystem.actorSelection("/user/issueStatisticsActor"+fSessionId).tell(new IssueStatisticsActor.Tick(name, repo), issueStatisticsActor);
         return ok(views.html.actor.render(request));
+    }
+
+    public Result UserSocketPage(Http.Request request, String name){
+        fSessionId = UUID.randomUUID().toString();
+        userProfileActor = actorSystem.actorOf(UserDataActor.props(), "userProfileActor"+fSessionId);
+
+        actorSystem.actorSelection("/user/userProfileActor"+fSessionId).tell(new UserDataActor.Tick(name), userProfileActor);
+        return ok(views.html.profileActor.render(request));
     }
 
 }
