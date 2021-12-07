@@ -62,6 +62,14 @@ public class IssueStatisticsActor extends AbstractActorWithTimers {
                     notifyClients(msg.name, msg.repo);
                 })
                 .match(RegisterMsg.class, msg -> userActors.add(sender()))
+                .match(String.class, msg -> {
+                    System.out.println("inside here");
+                    System.out.println(userActors);
+                    userActors.forEach(u -> {
+                        System.out.println(u.toString());
+                        u.tell("{\"message\":[]}",u);
+                    });
+                })
                 .build();
     }
 	
