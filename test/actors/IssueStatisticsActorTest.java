@@ -1,3 +1,9 @@
+
+/**
+ * A test class for Issue Statistics Actor
+ * 
+ * @author Meet Mehta
+ */
 package actors;
 
 import java.time.Duration;
