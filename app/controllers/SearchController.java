@@ -78,17 +78,9 @@ public class SearchController extends Controller {
         return ok(views.html.timer.render(request));
     }*/
 
-    public WebSocket ws() {
-        return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
-    }
 
-    public Result mytestRepo(Http.Request request, String name, String repo){
-        fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
-        repoActor = actorSystem.actorOf(RepositoryActor.getProps(), "myrepoActor_"+fSessionId);
 
-        actorSystem.actorSelection("/user/myrepoActor_"+fSessionId).tell(new RepositoryActor.Tick(name, repo), repoActor);
-        return ok(views.html.repo2.render(request));
-    }
+
     /**
      * The homepage which displays the search history of the current session
      * @author Hop Nguyen
@@ -250,6 +242,10 @@ public class SearchController extends Controller {
 
         actorSystem.actorSelection("/user/userProfileActor"+fSessionId).tell(new UserDataActor.Tick(name), userProfileActor);
         return ok(views.html.profileActor.render(request));
+    }
+
+    public WebSocket userDataSocket() {
+        return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
     }
 
     /**

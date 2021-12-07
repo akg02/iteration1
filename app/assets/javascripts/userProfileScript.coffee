@@ -14,7 +14,7 @@ $ ->
             repos[i] = repos[i].slice(0,-1)
 
 
-        data += "<a href='/repo/"+ (repos[i]) + "'>"
+        data += "<a href='/repoSocket/"+ message.userName + "/" + (repos[i]) + "'>"
         data += repos[i] + "<br/>"
     console.log(data)
     $('#repos').html data
