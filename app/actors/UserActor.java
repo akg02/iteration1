@@ -61,7 +61,7 @@ public class UserActor extends AbstractActor {
             this.profileInfo = profileInfo;
         }
     }
-    
+
     static public class IssueStatisticsMessage {
     	public final Map<String,Integer> message;
     	public IssueStatisticsMessage(Map<String,Integer> message) {
@@ -111,27 +111,39 @@ public class UserActor extends AbstractActor {
     }
 
     static public class RepoMessage{
-        public final RepositoryProfile rp;
-        public String name;
-        public String desc;
-        public int star_count;
+        public final RepositoryProfile repoProfile;
 
-        public RepoMessage(RepositoryProfile rp){
-            this.rp = rp;
-            this.name = rp.getName();
-            this.desc = rp.getDescription();
-            this.star_count = rp.getStargazers_count();
+        public RepoMessage(RepositoryProfile repoProfile){
+            this.repoProfile = repoProfile;
         }
 
 
     }
 
-    private void sendRepoMessage(RepoMessage rp){
+    private void sendRepoMessage(RepoMessage rm){
         final ObjectNode response = Json.newObject();
-        System.out.println(rp.name + "  " + rp.desc);
-        response.put("name", rp.name);
-        response.put("description", rp.desc);
-        response.put("starC", rp.star_count);
+        System.out.println(rm.repoProfile.getName() + "  " + rm.repoProfile.getDescription());
+        response.put("name", rm.repoProfile.getName());
+        response.put("description", rm.repoProfile.getDescription());
+        response.put("starC", rm.repoProfile.getStargazers_count());
+        response.put("forkC", rm.repoProfile.getForks_count());
+        response.put("topic", rm.repoProfile.getTopics().toString());
+        response.put("createDate", rm.repoProfile.getCreated_at().toString());
+        response.put("lastUpDate", rm.repoProfile.getUpdated_at().toString());
+
+        ArrayList<Map<String, String>> tempIL = new ArrayList<>();
+        List<Issue> il = rm.repoProfile.getIssues();
+        for(Issue i: il){
+            Map<String, String> temp = new HashMap<>();
+            temp.put("issueTitle", i.getTitle());
+            temp.put("issueBody", i.getBody());
+            temp.put("issueNumber", i.getNumber());
+            temp.put("issueLabels", i.getLabelNames().toString());
+
+            tempIL.add(temp);
+        }
+
+        response.put("issueList", tempIL.toString());
         ws.tell(response, self());
 
     }

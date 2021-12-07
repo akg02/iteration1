@@ -67,28 +67,28 @@ public class SearchController extends Controller {
         this.profileInfoService = new ProfileInfoService(github);
 
         this.commitActor = actorSystem.actorOf(CommitActor.props(), "commitActor");
-        actorSystem.actorOf(TimeActor.props(), "timeActor");
+//        actorSystem.actorOf(TimeActor.props(), "timeActor");
         //this.repoActor = system.actorOf(RepositoryActor.getProps(), "myrepoActor");
 
         //system.actorOf(TimeActor.getProps(), "timeActor");
 
     }
 
-    public Result timeMe(Http.Request request) {
-        return ok(views.html.timer.render(request));
-    }
+//    public Result timeMe(Http.Request request) {
+//        return ok(views.html.timer.render(request));
+//    }
 
     public WebSocket ws() {
         return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
     }
 
-    public Result mytestRepo(Http.Request request, String name, String repo){
-        fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
-        repoActor = actorSystem.actorOf(RepositoryActor.getProps(), "myrepoActor_"+fSessionId);
-
-        actorSystem.actorSelection("/user/myrepoActor_"+fSessionId).tell(new RepositoryActor.Tick(name, repo), repoActor);
-        return ok(views.html.repo2.render(request));
-    }
+//    public Result mytestRepo(Http.Request request, String name, String repo){
+//        fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
+//        repoActor = actorSystem.actorOf(RepositoryActor.getProps(), "myrepoActor_"+fSessionId);
+//
+//        actorSystem.actorSelection("/user/myrepoActor_"+fSessionId).tell(new RepositoryActor.Tick(name, repo), repoActor);
+//        return ok(views.html.repo2.render(request));
+//    }
     /**
      * The homepage which displays the search history of the current session
      * @author Hop Nguyen
@@ -168,6 +168,7 @@ public class SearchController extends Controller {
         CompletionStage<Result> result = this.cache.getOrElseUpdate("issueStat."+user+"."+repo,()->issueService.getIssueStatistics(user, repo).thenApplyAsync(
                 op -> ok(views.html.issuesStatistics.render(op, request)).withHeader(CACHE_CONTROL, "max-age=3600")));
 
+
         return result;
     }
 
@@ -209,14 +210,14 @@ public class SearchController extends Controller {
 
         actorSystem.actorSelection("/user/issueStatisticsActor"+fSessionId).tell(new IssueStatisticsActor.Tick(name, repo),issueStatisticsActor);
         return ok(views.html.issueActor.render(request));
+
     }
-
-
     public Result commitSocketPage(Http.Request request, String name, String repo){
         fSessionId = UUID.randomUUID().toString();
         commitActor = actorSystem.actorOf(CommitActor.props(), "commitActor"+fSessionId);
 
         actorSystem.actorSelection("/user/commitActor"+fSessionId).tell(new CommitActor.Tick(name, repo), commitActor);
+//        actorSystem.actorSelection("/user/issueStatisticsActor"+fSessionId).tell(new IssueStatisticsActor.Tick(name, repo), issueStatisticsActor);
         return ok(views.html.actor.render(request));
     }
 
@@ -226,6 +227,30 @@ public class SearchController extends Controller {
 
         actorSystem.actorSelection("/user/userProfileActor"+fSessionId).tell(new UserDataActor.Tick(name), userProfileActor);
         return ok(views.html.profileActor.render(request));
+    }
+
+    /**
+     * @author Sagar Sanghani
+     * @return
+     */
+
+    public WebSocket repositorySocket() {
+        return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
+    }
+
+    /**
+     * @author Sagar Sanghani
+     * @param request
+     * @param user
+     * @param repo
+     * @return
+     */
+
+    public Result repositorySocketPage(Http.Request request, String user, String repo){
+        fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
+        repoActor = actorSystem.actorOf(RepositoryActor.getProps(), "RepoActor_"+fSessionId);
+        actorSystem.actorSelection("/user/RepoActor_"+fSessionId).tell(new RepositoryActor.Tick(user, repo), repoActor);
+        return ok(views.html.repositoryActor.render(request, user, repo));
     }
 
 }
