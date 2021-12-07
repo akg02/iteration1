@@ -67,28 +67,28 @@ public class SearchController extends Controller {
         this.profileInfoService = new ProfileInfoService(github);
 
         this.commitActor = actorSystem.actorOf(CommitActor.props(), "commitActor");
-//        actorSystem.actorOf(TimeActor.props(), "timeActor");
+        //actorSystem.actorOf(TimeActor.props(), "timeActor");
         //this.repoActor = system.actorOf(RepositoryActor.getProps(), "myrepoActor");
 
         //system.actorOf(TimeActor.getProps(), "timeActor");
 
     }
 
-//    public Result timeMe(Http.Request request) {
-//        return ok(views.html.timer.render(request));
-//    }
+    /*public Result timeMe(Http.Request request) {
+        return ok(views.html.timer.render(request));
+    }*/
 
     public WebSocket ws() {
         return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
     }
 
-//    public Result mytestRepo(Http.Request request, String name, String repo){
-//        fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
-//        repoActor = actorSystem.actorOf(RepositoryActor.getProps(), "myrepoActor_"+fSessionId);
-//
-//        actorSystem.actorSelection("/user/myrepoActor_"+fSessionId).tell(new RepositoryActor.Tick(name, repo), repoActor);
-//        return ok(views.html.repo2.render(request));
-//    }
+    public Result mytestRepo(Http.Request request, String name, String repo){
+        fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
+        repoActor = actorSystem.actorOf(RepositoryActor.getProps(), "myrepoActor_"+fSessionId);
+
+        actorSystem.actorSelection("/user/myrepoActor_"+fSessionId).tell(new RepositoryActor.Tick(name, repo), repoActor);
+        return ok(views.html.repo2.render(request));
+    }
     /**
      * The homepage which displays the search history of the current session
      * @author Hop Nguyen
@@ -196,14 +196,24 @@ public class SearchController extends Controller {
         return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
     }
 
-    public WebSocket userDataSocket(){
-        return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
-    }
-
+    /**
+     * Method to create WebSocket for issueStatistics
+     * @author Meet Mehta
+     * @return WebSocket
+     */
     public WebSocket issueStatisticsSocket() {
     	return WebSocket.Json.accept(request -> ActorFlow.actorRef(f->UserActor.props(f, fSessionId), actorSystem, materializer));
     }
 
+    /**
+     * Method for Issue Statistics using Actors
+     * 
+     * @author Meet Mehta
+     * @param request
+     * @param name username 
+     * @param repo repository
+     * @return
+     */
     public Result issueStatisticsPage(Http.Request request,String name, String repo) {
         fSessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
         issueStatisticsActor = actorSystem.actorOf(IssueStatisticsActor.props(),"issueStatisticsActor"+fSessionId);

@@ -1,3 +1,9 @@
+
+/**
+ * An Actor for Issue Statistics
+ * 
+ * @author Meet Mehta
+ */
 package actors;
 
 import java.util.HashSet;
