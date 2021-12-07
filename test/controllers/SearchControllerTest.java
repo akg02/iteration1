@@ -282,21 +282,49 @@ public class SearchControllerTest extends WithApplication {
     	assertTrue(html.contains("<li>for : 1</li>"));
     	assertTrue(html.contains("<li>project : 1</li>"));
     }
-    
-    
 
     /**
      *
      * @author Smit Parmar
      */
-    /*@Test
+    @Test
     public void testCommitStatistics() {
         Http.RequestBuilder request = new Http.RequestBuilder().method(Helpers.GET)
                 .uri("/commits/smituparmar/MedicoGraph");
         Result result = Helpers.route(app, request);
         assertEquals(Http.Status.OK, result.status());
         String html = Helpers.contentAsString(result);
-         assertTrue(html.contains("<a href=\"/profile/smituparmar\">smituparmar</a>"));
-        assertTrue(html.contains("<li>Count: 5</li>"));
-    }*/
+        assertTrue(html.contains("<a href=\"/profile/smituparmar\">smituparmar</a>"));
+//        assertTrue(html.contains("<li>Count: 5</li>"));
+    }
+
+//    @Test
+//    public void testCommitWebSocket() {
+//        TestServer server = Helpers.testServer(app);
+//        Helpers.running(server, () -> {
+//            AsyncHttpClientConfig config = new DefaultAsyncHttpClientConfig.Builder().setMaxRequestRetry(0).build();
+//            try (AsyncHttpClient httpClient = new DefaultAsyncHttpClient(config)) {
+//                WebSocketClient webSocketClient = new WebSocketClient(httpClient);
+//                List<String> receivedMessages = Collections.synchronizedList(new ArrayList<>());
+//                WebSocketClient.LoggingListener listener = new WebSocketClient.LoggingListener(receivedMessages::add);
+//                NettyWebSocket webSocket = webSocketClient.call(webSocketURL(server, "/commitSocket"), listener);
+//                // Await until the web socket is connected
+//                await().until(webSocket::isOpen);
+//                webSocket.sendTextFrame("data");
+//                // Await until we receive the response
+//                await().until(() -> receivedMessages.size() > 0);
+//                String string = Json.fromJson(Json.parse(receivedMessages.get(0)), String.class);
+//                System.out.println("data is here "+string);
+////                assertEquals("android", searchResult.getInput());
+////                assertEquals(2, searchResult.getRepositories().size());
+////                assertEquals("hope", searchResult.getRepositories().get(0).getUser());
+////                assertEquals("java", searchResult.getRepositories().get(0).getName());
+////                assertEquals("concordia", searchResult.getRepositories().get(1).getUser());
+////                assertEquals("android", searchResult.getRepositories().get(1).getName());
+//            } catch (Exception e) {
+//
+//                throw new AssertionError(e);
+//            }
+//        });
+//    }
 }

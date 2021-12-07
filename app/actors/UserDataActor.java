@@ -6,24 +6,22 @@ import akka.actor.Props;
 import com.google.inject.Inject;
 import play.Logger;
 import scala.concurrent.duration.Duration;
-import services.CommitService;
+import services.ProfileInfoService;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class CommitActor extends AbstractActorWithTimers {
+public class UserDataActor extends AbstractActorWithTimers {
 
     private Set<ActorRef> userActors;
-    private  CommitService commitService = CommitService.getInstance();
+    private  ProfileInfoService profileInfoService = ProfileInfoService.getInstance();
 
     static public class Tick{
         public String name;
-        public String repo;
 
-        public Tick(String name, String repo) {
+        public Tick(String name) {
             this.name = name;
-            this.repo = repo;
         }
 
     }
@@ -33,22 +31,22 @@ public class CommitActor extends AbstractActorWithTimers {
     }
 
     static public Props props(){
-        return Props.create(CommitActor.class, () -> new CommitActor());
+        return Props.create(UserDataActor.class, () -> new UserDataActor());
     }
 
     @Inject
-    private CommitActor(){
+    private UserDataActor(){
         this.userActors = new HashSet<>();
     }
 
     @Override
     public void preStart() {
-        Logger.info("CommitActor {} started", self());
-//        getTimers().startPeriodicTimer("Timer", new Tick(userName, repoName), Duration.create(5, TimeUnit.SECONDS));
+        Logger.info("UserData {} started", self());
+        //getTimers().startPeriodicTimer("Timer", new Tick("a", "a"), Duration.create(5, TimeUnit.SECONDS));
     }
 
-    public void fiveSecondRefresh(String name, String repo){
-        getTimers().startPeriodicTimer("commitActor", new Tick(name, repo), Duration.create(5, TimeUnit.SECONDS));
+    public void fiveSecondRefresh(String name){
+        getTimers().startPeriodicTimer("UserData Actor", new Tick(name), Duration.create(15, TimeUnit.SECONDS));
     }
 
 
@@ -56,8 +54,8 @@ public class CommitActor extends AbstractActorWithTimers {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(Tick.class, msg -> {
-                    fiveSecondRefresh(msg.name, msg.repo);
-                    notifyClients(msg.name, msg.repo);
+                    fiveSecondRefresh(msg.name);
+                    notifyClients(msg.name);
                 })
                 .match(RegisterMsg.class, msg -> userActors.add(sender()))
                 .match(String.class, msg -> {
@@ -71,9 +69,9 @@ public class CommitActor extends AbstractActorWithTimers {
                 .build();
     }
 
-    private void notifyClients(String userName, String repoName){
-        commitService.getCommitStats(userName,repoName).thenAcceptAsync(list -> {
-            UserActor.CommitMessage tMsg = new UserActor.CommitMessage(list);
+    private void notifyClients(String userName){
+        profileInfoService.getRepoList(userName).thenAcceptAsync(list -> {
+            UserActor.UserProfileMessage tMsg = new UserActor.UserProfileMessage(list);
             userActors.forEach(ar -> ar.tell(tMsg, self()));
         });
 

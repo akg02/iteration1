@@ -29,7 +29,9 @@ public class UserActor extends AbstractActor {
 //                .tell(new TimeActor.RegisterMsg(), self());
         context().actorSelection("/user/commitActor"+id)
                 .tell(new CommitActor.RegisterMsg(), self());
-        context().actorSelection("/user/RepoActor_"+id)
+        context().actorSelection("/user/userProfileActor"+id)
+                .tell(new UserDataActor.RegisterMsg(), self());
+        context().actorSelection("/user/myrepoActor_"+id)
                 .tell(new RepositoryActor.RegisterMsg(), self());
         context().actorSelection("/user/issueStatisticsActor"+id).tell(new IssueStatisticsActor.RegisterMsg(), self());
 
@@ -42,6 +44,7 @@ public class UserActor extends AbstractActor {
                 .match(CommitMessage.class, this::sendCommitMessage)
                 .match(RepoMessage.class, this::sendRepoMessage)
                 .match(IssueStatisticsMessage.class, this::sendIssueStatisticsMessage)
+                .match(UserProfileMessage.class, this::sendUserProfileInfo)
                 .build();
     }
 
@@ -51,7 +54,14 @@ public class UserActor extends AbstractActor {
             this.list = list;
         }
     }
-    
+
+    static public class UserProfileMessage{
+        public final ProfileInfo profileInfo;
+        public UserProfileMessage(ProfileInfo profileInfo){
+            this.profileInfo = profileInfo;
+        }
+    }
+
     static public class IssueStatisticsMessage {
     	public final Map<String,Integer> message;
     	public IssueStatisticsMessage(Map<String,Integer> message) {
@@ -77,6 +87,14 @@ public class UserActor extends AbstractActor {
         final ObjectNode response = Json.newObject();
         response.put("message", message.message.toString());
     	ws.tell(response, self());
+    }
+
+    private void sendUserProfileInfo(UserProfileMessage message) {
+        final ObjectNode response = Json.newObject();
+        response.put("userName", message.profileInfo.getName());
+        response.put("bio", message.profileInfo.getBio());
+        response.put("repos", message.profileInfo.getRepos().toString());
+        ws.tell(response, self());
     }
 
     static public class TimeMessage {

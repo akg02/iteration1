@@ -19,13 +19,11 @@ public class CommitActorTest {
         final CommitService commitService = Mockito.mock(CommitService.class);
         final ActorSystem actorSystem = ActorSystem.create();
         try {
-//            SearchResult r1 = new SearchResult();
-//            r1.setInput("reactive");
+
             ArrayList<Map<String, Integer>> result1 = new ArrayList<>();
             Mockito.when(commitService.getCommitStats("smituparmar", "medicograph"))
                     .thenReturn(CompletableFuture.completedFuture(result1));
 
-            System.out.println("data data data "+result1);
             new TestKit(actorSystem) {{
                 System.out.println(actorSystem);
                 final Props props = CommitActor.props();

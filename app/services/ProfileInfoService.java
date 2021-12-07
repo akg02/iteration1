@@ -1,16 +1,14 @@
 package services;
 
+import com.google.inject.Singleton;
 import models.GithubClient;
-import models.Repository;
 import models.ProfileInfo;
 
 import javax.inject.Inject;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Service file to obtain public details of a github user
@@ -19,9 +17,16 @@ import java.util.concurrent.CompletableFuture;
  * @author Joon Seung Hwang
  *
  */
+@Singleton
 public class ProfileInfoService {
-	private final GithubClient github;
+	private static GithubClient github =  null;
     private final Map<String, ProfileInfo> info;
+
+    private static final ProfileInfoService instance = new ProfileInfoService(github);
+
+    public static ProfileInfoService getInstance() {
+        return instance;
+    }
 
     /**
      * Parmeterized Constructor

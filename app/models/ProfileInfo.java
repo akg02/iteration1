@@ -112,6 +112,21 @@ public class ProfileInfo {
 	public void setRepos(List<String> repos) {
 		this.repos = repos;
 	}
-	
 
+	@Override
+	public String toString() {
+		return "ProfileInfo{" +
+				"login='" + login + '\'' +
+				", name='" + name + '\'' +
+				", company='" + company + '\'' +
+				", blog='" + blog + '\'' +
+				", location='" + location + '\'' +
+				", email='" + email + '\'' +
+				", bio='" + bio + '\'' +
+				", twitter_username='" + twitter_username + '\'' +
+				", followers=" + followers +
+				", following=" + following +
+				", repos=" + repos +
+				'}';
+	}
 }

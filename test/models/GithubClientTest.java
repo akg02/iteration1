@@ -258,7 +258,7 @@ public class GithubClientTest {
         WSResponse response = mock(WSResponse.class);
 
         when(client.url("https://api.github.com/repos/smituparmar/MedicoGraph/commits/4477971350127c4edbca5f8acf439ce96fbca93e")).thenReturn(request);
-        when(request.addHeader("Authorization", "token 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")).thenReturn(request);
+        when(request.addHeader("Authorization", "token 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")).thenReturn(request);
         when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
         when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
 
@@ -392,7 +392,7 @@ public class GithubClientTest {
         WSResponse response = mock(WSResponse.class);
 
         when(client.url("https://api.github.com/repos/smituparmar/MedicoGraph-Frontend/commits")).thenReturn(request);
-        when(request.addHeader("Authorization", "token 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")).thenReturn(request);
+        when(request.addHeader("Authorization", "token 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")).thenReturn(request);
         when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
         when(request.addQueryParameter("per_page", "100")).thenReturn(request);
         when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
@@ -604,69 +604,69 @@ public class GithubClientTest {
      * test case for displayUserProfile
      * @author Joon Seung Hwang
      */
-//    @Test
-//    public void testDisplayUserProfile() throws Exception {
-//    	 WSClient client = mock(WSClient.class);
-//         WSRequest request = mock(WSRequest.class);
-//         WSResponse response = mock(WSResponse.class);
-//         List<String> repoList = new ArrayList<>();
-//
-//         when(client.url("https://api.github.com/users/mayjoonjuly")).thenReturn(request);
-//         when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
-//         when(request.addHeader("Authorization", "token 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s")).thenReturn(request);
-//         when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
-//         String responseString = "{\n"
-//         		+ "  \"login\": \"mayjoonjuly\",\n"
-//         		+ "  \"id\": 73373615,\n"
-//         		+ "  \"node_id\": \"MDQ6VXNlcjczMzczNjE1\",\n"
-//         		+ "  \"avatar_url\": \"https://avatars.githubusercontent.com/u/73373615?v=4\",\n"
-//         		+ "  \"gravatar_id\": \"\",\n"
-//         		+ "  \"url\": \"https://api.github.com/users/mayjoonjuly\",\n"
-//         		+ "  \"html_url\": \"https://github.com/mayjoonjuly\",\n"
-//         		+ "  \"followers_url\": \"https://api.github.com/users/mayjoonjuly/followers\",\n"
-//         		+ "  \"following_url\": \"https://api.github.com/users/mayjoonjuly/following{/other_user}\",\n"
-//         		+ "  \"gists_url\": \"https://api.github.com/users/mayjoonjuly/gists{/gist_id}\",\n"
-//         		+ "  \"starred_url\": \"https://api.github.com/users/mayjoonjuly/starred{/owner}{/repo}\",\n"
-//         		+ "  \"subscriptions_url\": \"https://api.github.com/users/mayjoonjuly/subscriptions\",\n"
-//         		+ "  \"organizations_url\": \"https://api.github.com/users/mayjoonjuly/orgs\",\n"
-//         		+ "  \"repos_url\": \"https://api.github.com/users/mayjoonjuly/repos\",\n"
-//         		+ "  \"events_url\": \"https://api.github.com/users/mayjoonjuly/events{/privacy}\",\n"
-//         		+ "  \"received_events_url\": \"https://api.github.com/users/mayjoonjuly/received_events\",\n"
-//         		+ "  \"type\": \"User\",\n"
-//         		+ "  \"site_admin\": false,\n"
-//         		+ "  \"name\": \"Joon Seung\",\n"
-//         		+ "  \"company\": \"abc\",\n"
-//         		+ "  \"blog\": \"www\",\n"
-//         		+ "  \"location\": \"montreal\",\n"
-//         		+ "  \"email\": null,\n"
-//         		+ "  \"hireable\": null,\n"
-//         		+ "  \"bio\": \"Testing\",\n"
-//         		+ "  \"twitter_username\": \"123\",\n"
-//         		+ "  \"public_repos\": 3,\n"
-//         		+ "  \"public_gists\": 0,\n"
-//         		+ "  \"followers\": 0,\n"
-//         		+ "  \"following\": 1,\n"
-//         		+ "  \"created_at\": \"2020-10-24T02:39:52Z\",\n"
-//         		+ "  \"updated_at\": \"2021-11-20T22:16:24Z\"\n"
-//         		+ "}";
-//
-//         when(response.asJson()).thenReturn(Json.parse(responseString));
-//         GithubClient github = new GithubClient(client, mockCache(null), ConfigFactory.load());
-//         CompletionStage<ProfileInfo> future = github.displayUserProfile("mayjoonjuly",repoList);
-//         ProfileInfo profileInfo = future.toCompletableFuture().get();
-//         assertEquals("mayjoonjuly", profileInfo.getLogin());
-//         assertEquals("Joon Seung", profileInfo.getName());
-//         assertEquals("Testing", profileInfo.getBio());
-//         assertEquals("abc", profileInfo.getCompany());
-//         assertEquals("www", profileInfo.getBlog());
-//         assertEquals("montreal", profileInfo.getLocation());
-//         assertEquals(null, profileInfo.getEmail());
-//         assertEquals("123", profileInfo.getTwitter());
-//         assertEquals(0, profileInfo.getFollowers());
-//         assertEquals(1, profileInfo.getFollowing());
-//         assertEquals(0, profileInfo.getRepos().size());
-//         Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
-//
-//    }
+    @Test
+    public void testDisplayUserProfile() throws Exception {
+    	 WSClient client = mock(WSClient.class);
+         WSRequest request = mock(WSRequest.class);
+         WSResponse response = mock(WSResponse.class);
+         List<String> repoList = new ArrayList<>();
+
+         when(client.url("https://api.github.com/users/mayjoonjuly")).thenReturn(request);
+         when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
+         when(request.addHeader("Authorization", "token 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")).thenReturn(request);
+         when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
+         String responseString = "{\n"
+         		+ "  \"login\": \"mayjoonjuly\",\n"
+         		+ "  \"id\": 73373615,\n"
+         		+ "  \"node_id\": \"MDQ6VXNlcjczMzczNjE1\",\n"
+         		+ "  \"avatar_url\": \"https://avatars.githubusercontent.com/u/73373615?v=4\",\n"
+         		+ "  \"gravatar_id\": \"\",\n"
+         		+ "  \"url\": \"https://api.github.com/users/mayjoonjuly\",\n"
+         		+ "  \"html_url\": \"https://github.com/mayjoonjuly\",\n"
+         		+ "  \"followers_url\": \"https://api.github.com/users/mayjoonjuly/followers\",\n"
+         		+ "  \"following_url\": \"https://api.github.com/users/mayjoonjuly/following{/other_user}\",\n"
+         		+ "  \"gists_url\": \"https://api.github.com/users/mayjoonjuly/gists{/gist_id}\",\n"
+         		+ "  \"starred_url\": \"https://api.github.com/users/mayjoonjuly/starred{/owner}{/repo}\",\n"
+         		+ "  \"subscriptions_url\": \"https://api.github.com/users/mayjoonjuly/subscriptions\",\n"
+         		+ "  \"organizations_url\": \"https://api.github.com/users/mayjoonjuly/orgs\",\n"
+         		+ "  \"repos_url\": \"https://api.github.com/users/mayjoonjuly/repos\",\n"
+         		+ "  \"events_url\": \"https://api.github.com/users/mayjoonjuly/events{/privacy}\",\n"
+         		+ "  \"received_events_url\": \"https://api.github.com/users/mayjoonjuly/received_events\",\n"
+         		+ "  \"type\": \"User\",\n"
+         		+ "  \"site_admin\": false,\n"
+         		+ "  \"name\": \"Joon Seung\",\n"
+         		+ "  \"company\": \"abc\",\n"
+         		+ "  \"blog\": \"www\",\n"
+         		+ "  \"location\": \"montreal\",\n"
+         		+ "  \"email\": null,\n"
+         		+ "  \"hireable\": null,\n"
+         		+ "  \"bio\": \"Testing\",\n"
+         		+ "  \"twitter_username\": \"123\",\n"
+         		+ "  \"public_repos\": 3,\n"
+         		+ "  \"public_gists\": 0,\n"
+         		+ "  \"followers\": 0,\n"
+         		+ "  \"following\": 1,\n"
+         		+ "  \"created_at\": \"2020-10-24T02:39:52Z\",\n"
+         		+ "  \"updated_at\": \"2021-11-20T22:16:24Z\"\n"
+         		+ "}";
+
+         when(response.asJson()).thenReturn(Json.parse(responseString));
+         GithubClient github = new GithubClient(client, mockCache(null), ConfigFactory.load());
+         CompletionStage<ProfileInfo> future = github.displayUserProfile("mayjoonjuly",repoList);
+         ProfileInfo profileInfo = future.toCompletableFuture().get();
+         assertEquals("mayjoonjuly", profileInfo.getLogin());
+         assertEquals("Joon Seung", profileInfo.getName());
+         assertEquals("Testing", profileInfo.getBio());
+         assertEquals("abc", profileInfo.getCompany());
+         assertEquals("www", profileInfo.getBlog());
+         assertEquals("montreal", profileInfo.getLocation());
+         assertEquals(null, profileInfo.getEmail());
+         assertEquals("123", profileInfo.getTwitter());
+         assertEquals(0, profileInfo.getFollowers());
+         assertEquals(1, profileInfo.getFollowing());
+         assertEquals(0, profileInfo.getRepos().size());
+         Mockito.verify(request).addHeader("Accept", "application/vnd.github.v3+json");
+
+    }
 
 }
