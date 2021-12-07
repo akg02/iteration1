@@ -202,7 +202,7 @@ public class SearchController extends Controller {
 
     /**
      * @author Sagar Sanghani
-     * @return
+     * @return Returns a websocket for repository
      */
 
     public WebSocket repositorySocket() {
@@ -211,10 +211,10 @@ public class SearchController extends Controller {
 
     /**
      * @author Sagar Sanghani
-     * @param request
-     * @param user
-     * @param repo
-     * @return
+     * @param request Http request
+     * @param user username of github repository
+     * @param repo repository name
+     * @return Returns a reactive RepositoryActorPage
      */
 
     public Result repositorySocketPage(Http.Request request, String user, String repo){
