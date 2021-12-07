@@ -258,7 +258,7 @@ public class GithubClientTest {
         WSResponse response = mock(WSResponse.class);
 
         when(client.url("https://api.github.com/repos/smituparmar/MedicoGraph/commits/4477971350127c4edbca5f8acf439ce96fbca93e")).thenReturn(request);
-        when(request.addHeader("Authorization", "token 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")).thenReturn(request);
+        when(request.addHeader(eq("Authorization"), anyString())).thenReturn(request);
         when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
         when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
 
@@ -392,7 +392,7 @@ public class GithubClientTest {
         WSResponse response = mock(WSResponse.class);
 
         when(client.url("https://api.github.com/repos/smituparmar/MedicoGraph-Frontend/commits")).thenReturn(request);
-        when(request.addHeader("Authorization", "token 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")).thenReturn(request);
+        when(request.addHeader(eq("Authorization"), anyString())).thenReturn(request);
         when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
         when(request.addQueryParameter("per_page", "100")).thenReturn(request);
         when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
@@ -575,6 +575,7 @@ public class GithubClientTest {
 
         when(client.url("https://api.github.com/repos/Sagar7421/dinosaur-name-generation-rnn")).thenReturn(request);
         when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
+        when(request.addHeader(eq("Authorization"), anyString())).thenReturn(request);
         when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
         String responseString = "{ " +
                 " \"name\": \"dinosaur-name-generation-rnn\"," +
@@ -613,7 +614,7 @@ public class GithubClientTest {
 
          when(client.url("https://api.github.com/users/mayjoonjuly")).thenReturn(request);
          when(request.addHeader("Accept", "application/vnd.github.v3+json")).thenReturn(request);
-         when(request.addHeader("Authorization", "token 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")).thenReturn(request);
+         when(request.addHeader(eq("Authorization"), anyString())).thenReturn(request);
          when(request.get()).thenReturn(CompletableFuture.completedFuture(response));
          String responseString = "{\n"
          		+ "  \"login\": \"mayjoonjuly\",\n"

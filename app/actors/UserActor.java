@@ -9,6 +9,11 @@ import play.libs.Json;
 import models.*;
 import java.util.*;
 
+/**
+ * This is User Actor file which will overlook every other actor and will be repsonsible for sending the data to page
+ *
+ * @author Smit Parmar Sagar Sanghani
+ */
 public class UserActor extends AbstractActor {
     private final ActorRef ws;
     private String id;
@@ -37,6 +42,10 @@ public class UserActor extends AbstractActor {
 
     }
 
+    /**
+     * Here, we will decide action according to message class
+     * @return course of action
+     */
     @Override
     public Receive createReceive() {
         return receiveBuilder()
@@ -48,6 +57,10 @@ public class UserActor extends AbstractActor {
                 .build();
     }
 
+    /**
+     * This will deine how we want to send commit Message
+     * @author Smit Parmar
+     */
     static public class CommitMessage {
         public final ArrayList<Map<String,Integer>> list;
         public CommitMessage(ArrayList<Map<String, Integer>> list){
@@ -69,6 +82,11 @@ public class UserActor extends AbstractActor {
     	}
     }
 
+    /**
+     * Here, we will create JSON object and will send it to user
+     * @param msg CommitMessage object
+     * @author Smit Parmar
+     */
     private void sendCommitMessage(CommitMessage msg) {
         final ObjectNode response = Json.newObject();
         response.put("maxAddition", msg.list.get(0).get("maxAddition"));

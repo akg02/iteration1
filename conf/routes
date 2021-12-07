@@ -5,6 +5,7 @@ GET    /topic/:topic                controllers.SearchController.topic(topic: St
 GET    /websocket/topic             controllers.SearchController.topicWebSocket
 
 GET    /commits/:user/:repo     controllers.SearchController.commitSocketPage(request: Request, user: String, repo: String)
+GET    /commit/:user/:repo     controllers.SearchController.commits(user: String, repo: String, request: Request)
 GET    /userSocket/:user             controllers.SearchController.UserSocketPage(request: Request, user: String)
 GET	   /issueStatisticsSocket/:user/:repo controllers.SearchController.issueStatisticsPage(request: Request, user: String, repo: String)
 
@@ -14,7 +15,7 @@ GET    /repository/:user/:repo      controllers.SearchController.repository(user
 GET    /repoSocket/:user/:repo          controllers.SearchController.repositorySocketPage(request: Request, user: String, repo: String)
 GET    /repoWebSocket            controllers.SearchController.repositorySocket
 
-GET    /issueStatistics/:user/:repo			controllers.SearchController.issueStatisticsPage(request: Request, user: String, repo: String)
+GET    /issueStatistics/:user/:repo			controllers.SearchController.issueStatistics(user: String, repo: String, request:Request)
 #controllers.SearchController.issueStatistics(user: String, repo: String, request:Request)
 
 GET     /commitSocket                         controllers.SearchController.commitSocket
