@@ -52,6 +52,10 @@ public class RepositoryActor extends AbstractActorWithTimers {
     static public class RegisterMsg{
     }
 
+    /**
+     * Function to create a new actor of Repository Class
+     * @return a repository actor
+     */
     static public Props getProps() {
         return Props.create(RepositoryActor.class, ()-> new RepositoryActor());
     }

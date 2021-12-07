@@ -36,7 +36,7 @@ public class UserActor extends AbstractActor {
                 .tell(new CommitActor.RegisterMsg(), self());
         context().actorSelection("/user/userProfileActor"+id)
                 .tell(new UserDataActor.RegisterMsg(), self());
-        context().actorSelection("/user/myrepoActor_"+id)
+        context().actorSelection("/user/RepoActor_"+id)
                 .tell(new RepositoryActor.RegisterMsg(), self());
         context().actorSelection("/user/issueStatisticsActor"+id).tell(new IssueStatisticsActor.RegisterMsg(), self());
 
@@ -147,7 +147,6 @@ public class UserActor extends AbstractActor {
      */
     private void sendRepoMessage(RepoMessage rm){
         final ObjectNode response = Json.newObject();
-        System.out.println(rm.repoProfile.getName() + "  " + rm.repoProfile.getDescription());
         response.put("name", rm.repoProfile.getName());
         response.put("description", rm.repoProfile.getDescription());
         response.put("starC", rm.repoProfile.getStargazers_count());
