@@ -36,7 +36,7 @@ public class UserActor extends AbstractActor {
                 .tell(new CommitActor.RegisterMsg(), self());
         context().actorSelection("/user/userProfileActor"+id)
                 .tell(new UserDataActor.RegisterMsg(), self());
-        context().actorSelection("/user/myrepoActor_"+id)
+        context().actorSelection("/user/RepoActor_"+id)
                 .tell(new RepositoryActor.RegisterMsg(), self());
         context().actorSelection("/user/issueStatisticsActor"+id).tell(new IssueStatisticsActor.RegisterMsg(), self());
 
@@ -128,19 +128,25 @@ public class UserActor extends AbstractActor {
         ws.tell(response, self());
     }
 
+    /**
+     * @author Sagar Sanghani
+     * Class to represent the RepoMessage sent by the UserActor to the client
+     */
     static public class RepoMessage{
         public final RepositoryProfile repoProfile;
 
         public RepoMessage(RepositoryProfile repoProfile){
             this.repoProfile = repoProfile;
         }
-
-
     }
 
+    /**
+     * Function to generate a json response based on the Repo Message and send it to the client
+     * @author Sagar Sanghani
+     * @param rm RepoMessage object which has all repository details
+     */
     private void sendRepoMessage(RepoMessage rm){
         final ObjectNode response = Json.newObject();
-        System.out.println(rm.repoProfile.getName() + "  " + rm.repoProfile.getDescription());
         response.put("name", rm.repoProfile.getName());
         response.put("description", rm.repoProfile.getDescription());
         response.put("starC", rm.repoProfile.getStargazers_count());

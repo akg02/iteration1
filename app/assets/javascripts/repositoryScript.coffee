@@ -13,17 +13,17 @@ $ ->
     topicMess = ""
     if topicList.length > 0
       for t of topicList
-        if t == 0 and t == topicList.length-1
-          topicMess = topicMess + topicList[t].slice(1, -1)
+        if t == 0 and t == JSON.stringify(topicList.length-1)
+          topicList[t] = topicList[t].slice(1, -1)
 
-        else
-          if t == 0
-            topicMess = topicMess + topicList[t].slice(1)
-          else
-            if t == topicList.length-1
-              topicMess = topicMess + topicList[t].slice(0, -1)
-            else
-              topicMess = topicMess + topicList[t]
+        if t == 0
+          topicList[t] = topicList[t].slice(1)
+
+        if t == JSON.stringify(topicList.length-1)
+           topicList[t] = topicList[t].slice(0, -1)
+
+        topicMess += "<a href='/topic/" + topicList[t] + "'>"
+        topicMess += "<Strong>"+topicList[t]+"</Strong>   "
 
       console.log(topicMess)
       $('#topics').html(topicMess)
