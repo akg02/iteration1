@@ -12,11 +12,19 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This is the CommitActor
+ *
+ * @author Smit Parmar
+ */
 public class CommitActor extends AbstractActorWithTimers {
 
     private Set<ActorRef> userActors;
     private  CommitService commitService = CommitService.getInstance();
 
+    /**
+     * This is Tick class which is responsible for making data dynamic
+     */
     static public class Tick{
         public String name;
         public String repo;
@@ -32,6 +40,10 @@ public class CommitActor extends AbstractActorWithTimers {
 
     }
 
+    /**
+     * This will create new object of CommitActor
+     * @return new CommitActor object
+     */
     static public Props props(){
         return Props.create(CommitActor.class, () -> new CommitActor());
     }
@@ -52,6 +64,10 @@ public class CommitActor extends AbstractActorWithTimers {
     }
 
 
+    /**
+     * Here, we will decide action according to message class
+     * @return course of action
+     */
     @Override
     public Receive createReceive() {
         return receiveBuilder()
@@ -71,6 +87,11 @@ public class CommitActor extends AbstractActorWithTimers {
                 .build();
     }
 
+    /**
+     * We will get data from service and will tell useractor about it
+     * @param userName username
+     * @param repoName repository name
+     */
     private void notifyClients(String userName, String repoName){
         commitService.getCommitStats(userName,repoName).thenAcceptAsync(list -> {
             UserActor.CommitMessage tMsg = new UserActor.CommitMessage(list);

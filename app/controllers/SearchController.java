@@ -192,6 +192,11 @@ public class SearchController extends Controller {
         return resultCompletionStage;
     }
 
+    /**
+     * This will create websocket which is going to use by commit statistics page
+     * @return Websocket
+     * @author Smit Parmar
+     */
     public WebSocket commitSocket(){
         return WebSocket.Json.accept(request -> ActorFlow.actorRef(f -> UserActor.props(f, fSessionId), actorSystem, materializer));
     }
@@ -212,6 +217,14 @@ public class SearchController extends Controller {
         return ok(views.html.issueActor.render(request));
 
     }
+
+    /**
+     * This method will take new actor based on session ID and will try to send data via web socket to that page
+     * @param request
+     * @param name username
+     * @param repo repository name
+     * @return commit statistics page
+     */
     public Result commitSocketPage(Http.Request request, String name, String repo){
         fSessionId = UUID.randomUUID().toString();
         commitActor = actorSystem.actorOf(CommitActor.props(), "commitActor"+fSessionId);

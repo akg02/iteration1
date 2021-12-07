@@ -290,7 +290,7 @@ public class SearchControllerTest extends WithApplication {
     @Test
     public void testCommitStatistics() {
         Http.RequestBuilder request = new Http.RequestBuilder().method(Helpers.GET)
-                .uri("/commits/smituparmar/MedicoGraph");
+                .uri("/commit/smituparmar/MedicoGraph");
         Result result = Helpers.route(app, request);
         assertEquals(Http.Status.OK, result.status());
         String html = Helpers.contentAsString(result);
