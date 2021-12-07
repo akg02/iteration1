@@ -9,6 +9,7 @@ $ ->
     $('#createAt').html(message.createDate)
     $('#lastupdate').html(message.lastUpDate)
 
+    message.topic = message.topic.slice(1)
     topicList = message.topic.split(',')
     topicMess = ""
     if topicList.length > 0
@@ -31,14 +32,13 @@ $ ->
       $('#topics').html("No Topics")
 
     issueList2 = message.issueList.split(",")
+    data = ''
     if issueList2.length > 0
       for i in issueList2
         il = i.split(",")
         for j in il
-          $('#issues').append j + "<br/>"
-        $('#issues'). append +"<br/>"
+          data += j + "<br/>"
+
+      $('#issues').html(data)
     else
       $('#issues').html("No Issues")
-
-
-
