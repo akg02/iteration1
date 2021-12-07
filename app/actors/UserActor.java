@@ -128,16 +128,23 @@ public class UserActor extends AbstractActor {
         ws.tell(response, self());
     }
 
+    /**
+     * @author Sagar Sanghani
+     * Class to represent the RepoMessage sent by the UserActor to the client
+     */
     static public class RepoMessage{
         public final RepositoryProfile repoProfile;
 
         public RepoMessage(RepositoryProfile repoProfile){
             this.repoProfile = repoProfile;
         }
-
-
     }
 
+    /**
+     * Function to generate a json response based on the Repo Message and send it to the client
+     * @author Sagar Sanghani
+     * @param rm RepoMessage object which has all repository details
+     */
     private void sendRepoMessage(RepoMessage rm){
         final ObjectNode response = Json.newObject();
         System.out.println(rm.repoProfile.getName() + "  " + rm.repoProfile.getDescription());
