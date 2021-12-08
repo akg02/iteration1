@@ -8,9 +8,9 @@ function repo_to_html(repo) {
     }
     return `
      <li style="margin-bottom: 10px;">
-            User: <a href="/profile/${repo.user}">${repo.user}</a>
+            User: <a href="/userSocket/${repo.user}">${repo.user}</a>
             /
-            repository: <a href="/repository/${repo.user}/${repo.name}">${repo.name}</a><br/>
+            repository: <a href="/repoSocket/${repo.user}/${repo.name}">${repo.name}</a><br/>
             ${html_topics}
      </li>
 	`;
