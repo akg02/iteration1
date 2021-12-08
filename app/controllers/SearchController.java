@@ -8,20 +8,15 @@ import com.google.inject.Inject;
 import models.GithubClient;
 import models.SearchHistory;
 import play.cache.AsyncCacheApi;
-import services.HistoryService;
 import play.libs.streams.ActorFlow;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.WebSocket;
-import services.CommitService;
-import services.IssueService;
-import services.ProfileInfoService;
-import services.RepositoryProfileService;
+import services.*;
 import views.html.repository;
 
 import java.util.UUID;
-import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -96,7 +91,7 @@ public class SearchController extends Controller {
             String sessionId = request.session().get(SESSION_ID).orElseGet(() -> UUID.randomUUID().toString());
             SearchHistory searchHistory = historyService.getHistory(sessionId);
             return ActorFlow.actorRef(
-                    out -> SearchActor.props(actorSystem, Duration.ofSeconds(10), out, github, searchHistory),
+                    out -> SearchActor.props(out, github, searchHistory),
                     actorSystem,
                     materializer);
         });
@@ -113,7 +108,7 @@ public class SearchController extends Controller {
     public WebSocket topicWebSocket() {
         return WebSocket.Text.accept(request ->
                 ActorFlow.actorRef(
-                        out -> TopicActor.props(actorSystem, Duration.ofSeconds(5), out, github),
+                        out -> TopicActor.props(out, github),
                         actorSystem,
                         materializer));
     }

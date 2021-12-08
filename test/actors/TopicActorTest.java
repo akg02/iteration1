@@ -27,10 +27,10 @@ public class TopicActorTest {
             Mockito.when(github.searchRepositories("reactive", true))
                     .thenReturn(CompletableFuture.completedFuture(r1));
             new TestKit(actorSystem) {{
-                final Props props = TopicActor.props(actorSystem, Duration.ofSeconds(1), getRef(), github);
+                final Props props = TopicActor.props(getRef(), github);
                 final ActorRef topicActor = actorSystem.actorOf(props);
                 topicActor.tell("reactive", getRef());
-                within(Duration.ofSeconds(3), () -> {
+                within(Duration.ofSeconds(10), () -> {
                     awaitCond(this::msgAvailable);
                     expectMsg("{\"input\":\"reactive\",\"items\":[{\"user\":\"hope\",\"name\":\"java\",\"topics\":[]}]}");
                     expectNoMessage();
@@ -41,9 +41,16 @@ public class TopicActorTest {
                 r2.setRepositories(Arrays.asList(new Repository("concordia", "playframework", Collections.emptyList())));
                 Mockito.when(github.searchRepositories("reactive", true))
                         .thenReturn(CompletableFuture.completedFuture(r2));
-                within(Duration.ofSeconds(3), () -> {
+                within(Duration.ofSeconds(10), () -> {
                     awaitCond(this::msgAvailable);
                     expectMsg("{\"input\":\"reactive\",\"items\":[{\"user\":\"concordia\",\"name\":\"playframework\",\"topics\":[]}]}");
+                    expectNoMessage();
+                    return null;
+                });
+                r2.setSuccess(false);
+                r2.setRepositories(Arrays.asList(new Repository("google", "android", Collections.emptyList())));
+                topicActor.tell("reactive", getRef());
+                within(Duration.ofSeconds(10), () -> {
                     expectNoMessage();
                     return null;
                 });

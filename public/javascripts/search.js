@@ -11,6 +11,9 @@ function display_search_history(search_results) {
 $(document).ready(() => {
     const url = $("body").data("ws-url");
     const ws = new WebSocket(url);
+    ws.onerror = () => {
+        alert("Websocket has failed! Reload to the page to continue");
+    };
     ws.onmessage = event => {
         console.log("receive new results " + event.data)
         const search_history = JSON.parse(event.data);

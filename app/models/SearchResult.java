@@ -1,8 +1,10 @@
 package models;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,7 +16,9 @@ public class SearchResult {
 
     private String input;
 
-    private List<Repository> repositories;
+    private List<Repository> repositories = new ArrayList<>();
+
+    private boolean success = true;
 
     /**
      * The empty constructor for Json
@@ -52,6 +56,15 @@ public class SearchResult {
      */
     public void setInput(String input) {
         this.input = input;
+    }
+
+    @JsonIgnore
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 
     /**
