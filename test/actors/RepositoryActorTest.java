@@ -11,7 +11,12 @@ import services.RepositoryProfileService;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Test class to test repository actor
+ * @author Sagar Sanghani
+ */
 public class RepositoryActorTest {
+
     @Test
     public void testRepository() {
         final RepositoryProfileService repoService = Mockito.mock(RepositoryProfileService.class);
