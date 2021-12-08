@@ -6,6 +6,9 @@ function display_search_result(search_result) {
 
 $(document).ready(() => {
     const ws = new WebSocket($("body").data("ws-url"));
+    ws.onerror = () => {
+        alert("Websocket has failed! Reload to the page to continue");
+    };
     ws.onmessage = event => {
         const results = JSON.parse(event.data);
         display_search_result(results);

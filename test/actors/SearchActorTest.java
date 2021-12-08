@@ -32,7 +32,7 @@ public class SearchActorTest {
                     .thenReturn(CompletableFuture.completedFuture(r1));
 
             new TestKit(actorSystem) {{
-                final Props props = SearchActor.props(actorSystem, Duration.ofSeconds(1), getRef(), github, searchHistory);
+                final Props props = SearchActor.props(getRef(), github, searchHistory);
                 final ActorRef searchActorRef = actorSystem.actorOf(props);
                 searchActorRef.tell("reactive", getRef());
                 within(Duration.ofSeconds(1), () -> {
@@ -49,7 +49,7 @@ public class SearchActorTest {
                         .thenReturn(CompletableFuture.completedFuture(r2));
 
                 // The SearchActor automatically sends out the history on init
-                within(Duration.ofSeconds(3), () -> {
+                within(Duration.ofSeconds(10), () -> {
                     awaitCond(this::msgAvailable);
                     expectMsg("[{\"input\":\"reactive\",\"items\":[{\"user\":\"concordia\",\"name\":\"soen\",\"topics\":[]}]}]");
                     expectNoMessage();
@@ -57,6 +57,15 @@ public class SearchActorTest {
                 });
 
                 assertEquals(1, searchHistory.getResults().size());
+
+                r2.setSuccess(false);
+                searchActorRef.tell("reactive", getRef());
+                // The SearchActor automatically sends out the history on init
+                within(Duration.ofSeconds(10), () -> {
+                    expectNoMessage();
+                    return null;
+                });
+
             }};
         } finally {
             TestKit.shutdownActorSystem(actorSystem);

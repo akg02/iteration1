@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.typesafe.config.Config;
+import play.api.http.Status;
 import play.cache.AsyncCacheApi;
 import play.libs.Json;
 import play.libs.ws.WSClient;
@@ -63,9 +64,10 @@ public class GithubClient {
                     .thenApplyAsync(r -> {
                         SearchResult searchResult = Json.fromJson(r.asJson(), SearchResult.class);
                         searchResult.setInput(query);
+                        searchResult.setSuccess(Status.isSuccessful(r.getStatus()));
                         return searchResult;
                     });
-        }, 5);
+        }, 3);
     }
 
 	public CompletionStage<List<Issue>> getIssues(String authorName, String repositoryName) {

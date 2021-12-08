@@ -23,7 +23,6 @@ public class SearchHistoryTest {
         HistoryService historyService = new HistoryService();
         SearchHistory history = historyService.getHistory("session_1");
         assertTrue(history.getResults().isEmpty());
-        assertTrue(history.getQueries().isEmpty());
 
         // Add up to 10 items
         for (int i = 1; i <= 10; i++) {
